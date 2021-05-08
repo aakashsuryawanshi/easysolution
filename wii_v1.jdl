@@ -1,0 +1,65 @@
+
+/**
+requirements
+ER diagram
+class diagram
+*/
+entity Domain {
+	name String
+    description String
+}
+
+entity Branch {
+	name String
+    description String
+}
+
+entity Semester {
+	name String
+    description String
+}
+
+entity Subject{
+	name String
+    description String
+}
+
+/**
+ * Task entity.
+ * @author The JHipster team.
+ */
+entity Question {
+	title String,
+	description String,
+    topic String
+}
+
+/**
+ * The Employee entity.
+ */
+entity TagMetaData{
+	key String,
+    value String
+}
+
+entity Content {
+	type ContentType,
+	text String,
+	filePath String,
+    seqNum Integer
+}
+
+enum ContentType{
+	PARA, IMAGE
+}
+
+relationship OneToMany {
+	Domain to Branch{branches},
+	Branch to Semester{semester}
+    Semester to Subject{subject}
+    Subject to Question{question}
+    Question to TagMetaData{tags}
+    Question to Content{answers}
+}
+
+

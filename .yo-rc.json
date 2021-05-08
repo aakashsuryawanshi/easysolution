@@ -1,0 +1,37 @@
+{
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "com.apt.wii"
+    },
+    "jhipsterVersion": "6.10.5",
+    "applicationType": "microservice",
+    "baseName": "wii",
+    "packageName": "com.apt.wii",
+    "packageFolder": "com/apt/wii",
+    "serverPort": "8081",
+    "authenticationType": "oauth2",
+    "cacheProvider": "no",
+    "websocket": false,
+    "databaseType": "sql",
+    "devDatabaseType": "postgresql",
+    "prodDatabaseType": "postgresql",
+    "searchEngine": false,
+    "messageBroker": false,
+    "serviceDiscoveryType": false,
+    "buildTool": "maven",
+    "enableSwaggerCodegen": false,
+    "jwtSecretKey": "NWEyOGQ3ZTNmNDNmYWZiN2NmMzhiZGFkZjhkMTUwZWJkNmY2NDhmNGM1OWI4MjBiMDg2NzM5NzIwMjJjNDVkMmMxZWZlNjI1NDA4ZTE4NGM1N2QxMjgxZTFlOWRiOWMwZmMzMWQzZTc2MTdkZDU2NTdhMzBiN2RhODAwNGJkZDU=",
+    "embeddableLaunchScript": false,
+    "creationTimestamp": 1620486454935,
+    "testFrameworks": [],
+    "jhiPrefix": "jhi",
+    "entitySuffix": "",
+    "dtoSuffix": "DTO",
+    "otherModules": [],
+    "enableTranslation": false,
+    "clientPackageManager": "npm",
+    "blueprints": [],
+    "skipClient": true,
+    "skipUserManagement": true
+  }
+}
