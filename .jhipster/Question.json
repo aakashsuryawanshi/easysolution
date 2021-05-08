@@ -1,0 +1,51 @@
+{
+  "name": "Question",
+  "fields": [
+    {
+      "fieldName": "title",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "topic",
+      "fieldType": "String"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "one-to-many",
+      "otherEntityName": "tagMetaData",
+      "otherEntityRelationshipName": "tags",
+      "relationshipName": "tagMetaData"
+    },
+    {
+      "relationshipType": "one-to-many",
+      "otherEntityName": "content",
+      "otherEntityRelationshipName": "answers",
+      "relationshipName": "content"
+    },
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "subject",
+      "otherEntityRelationshipName": "question",
+      "relationshipName": "question",
+      "otherEntityField": "id"
+    }
+  ],
+  "changelogDate": "20210508155428",
+  "javadoc": "Task entity.\\n@author The JHipster team.",
+  "entityTableName": "question",
+  "dto": "no",
+  "pagination": "no",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "clientRootFolder": "wii",
+  "applications": "*",
+  "microserviceName": "wii"
+}

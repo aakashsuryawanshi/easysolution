@@ -1,0 +1,40 @@
+{
+  "name": "Subject",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "one-to-many",
+      "otherEntityName": "question",
+      "otherEntityRelationshipName": "question",
+      "relationshipName": "question"
+    },
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "semester",
+      "otherEntityRelationshipName": "subject",
+      "relationshipName": "subject",
+      "otherEntityField": "id"
+    }
+  ],
+  "changelogDate": "20210508155328",
+  "entityTableName": "subject",
+  "dto": "no",
+  "pagination": "no",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "clientRootFolder": "wii",
+  "applications": "*",
+  "microserviceName": "wii"
+}

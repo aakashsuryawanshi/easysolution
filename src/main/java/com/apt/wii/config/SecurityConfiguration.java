@@ -25,6 +25,8 @@ import com.apt.wii.security.oauth2.JwtGrantedAuthorityConverter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
+// uncomment this to enable auth
+/*
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @Import(SecurityProblemSupport.class)
@@ -100,3 +102,4 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return jwtDecoder;
     }
 }
+*/

@@ -1,0 +1,34 @@
+{
+  "name": "Domain",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "one-to-many",
+      "otherEntityName": "branch",
+      "otherEntityRelationshipName": "branches",
+      "relationshipName": "branch"
+    }
+  ],
+  "changelogDate": "20210508155028",
+  "javadoc": "requirements\\nER diagram\\nclass diagram",
+  "entityTableName": "domain",
+  "dto": "no",
+  "pagination": "no",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "clientRootFolder": "wii",
+  "applications": "*",
+  "microserviceName": "wii"
+}

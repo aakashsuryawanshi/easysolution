@@ -1,0 +1,43 @@
+{
+  "name": "Content",
+  "fields": [
+    {
+      "fieldName": "type",
+      "fieldType": "ContentType",
+      "fieldValues": "PARA,IMAGE"
+    },
+    {
+      "fieldName": "text",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "filePath",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "seqNum",
+      "fieldType": "Integer"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "question",
+      "otherEntityRelationshipName": "content",
+      "relationshipName": "answers",
+      "otherEntityField": "id"
+    }
+  ],
+  "changelogDate": "20210508155628",
+  "entityTableName": "content",
+  "dto": "no",
+  "pagination": "no",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "clientRootFolder": "wii",
+  "applications": "*",
+  "microserviceName": "wii"
+}

@@ -1,0 +1,35 @@
+{
+  "name": "TagMetaData",
+  "fields": [
+    {
+      "fieldName": "key",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "value",
+      "fieldType": "String"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "question",
+      "otherEntityRelationshipName": "tagMetaData",
+      "relationshipName": "tags",
+      "otherEntityField": "id"
+    }
+  ],
+  "changelogDate": "20210508155528",
+  "javadoc": "The Employee entity.",
+  "entityTableName": "tag_meta_data",
+  "dto": "no",
+  "pagination": "no",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "clientRootFolder": "wii",
+  "applications": "*",
+  "microserviceName": "wii"
+}

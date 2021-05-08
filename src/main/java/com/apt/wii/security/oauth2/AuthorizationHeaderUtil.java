@@ -40,11 +40,39 @@ public class AuthorizationHeaderUtil {
     private final OAuth2AuthorizedClientService clientService;
     private final RestTemplateBuilder restTemplateBuilder;
     private final Logger log = LoggerFactory.getLogger(AuthorizationHeaderUtil.class);
-
+    // this constructor is used to disable auth
+    public AuthorizationHeaderUtil(RestTemplateBuilder restTemplateBuilder) {
+        this.clientService = new OAuth2AuthorizedClientService() {
+			
+			@Override
+			public void saveAuthorizedClient(OAuth2AuthorizedClient authorizedClient, Authentication principal) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void removeAuthorizedClient(String clientRegistrationId, String principalName) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public <T extends OAuth2AuthorizedClient> T loadAuthorizedClient(String clientRegistrationId,
+					String principalName) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
+        this.restTemplateBuilder = restTemplateBuilder;
+    }
+    
+    // this constructor is used to enable auth
+    /*
     public AuthorizationHeaderUtil(OAuth2AuthorizedClientService clientService, RestTemplateBuilder restTemplateBuilder) {
         this.clientService = clientService;
         this.restTemplateBuilder = restTemplateBuilder;
     }
+    */
 
     public Optional<String> getAuthorizationHeader() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

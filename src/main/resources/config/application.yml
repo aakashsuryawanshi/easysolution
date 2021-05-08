@@ -78,6 +78,7 @@ management:
           autotime:
             enabled: true
 
+liquibase.enabled: false
 spring:
   application:
     name: wii
@@ -108,7 +109,7 @@ spring:
       hibernate.query.fail_on_pagination_over_collection_fetch: true
       hibernate.query.in_clause_parameter_padding: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
       naming:
         physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
@@ -132,16 +133,16 @@ spring:
   output:
     ansi:
       console-available: true
-  security:
-    oauth2:
-      client:
-        provider:
-          oidc:
-            issuer-uri: http://localhost:9080/auth/realms/jhipster
-        registration:
-          oidc:
-            client-id: internal
-            client-secret: internal
+#  security:
+#    oauth2:
+#      client:
+#        provider:
+#          oidc:
+#            issuer-uri: http://localhost:9080/auth/realms/jhipster
+#        registration:
+#          oidc:
+#            client-id: internal
+#            client-secret: internal
 
 server:
   servlet:

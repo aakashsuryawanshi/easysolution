@@ -1,0 +1,40 @@
+{
+  "name": "Branch",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "one-to-many",
+      "otherEntityName": "semester",
+      "otherEntityRelationshipName": "semester",
+      "relationshipName": "semester"
+    },
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "domain",
+      "otherEntityRelationshipName": "branch",
+      "relationshipName": "branches",
+      "otherEntityField": "id"
+    }
+  ],
+  "changelogDate": "20210508155128",
+  "entityTableName": "branch",
+  "dto": "no",
+  "pagination": "no",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "clientRootFolder": "wii",
+  "applications": "*",
+  "microserviceName": "wii"
+}
