@@ -1,12 +1,10 @@
 package com.apt.wii.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import javax.persistence.*;
-
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.*;
 
 /**
  * A Branch.
@@ -28,12 +26,13 @@ public class Branch implements Serializable {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "semester")
+    @OneToMany(mappedBy = "branch")
+    @JsonIgnoreProperties(value = { "subjects", "branch" }, allowSetters = true)
     private Set<Semester> semesters = new HashSet<>();
 
     @ManyToOne
-    @JsonIgnoreProperties(value = "branches", allowSetters = true)
-    private Domain branches;
+    @JsonIgnoreProperties(value = { "branches" }, allowSetters = true)
+    private Domain domain;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -44,8 +43,13 @@ public class Branch implements Serializable {
         this.id = id;
     }
 
+    public Branch id(Long id) {
+        this.id = id;
+        return this;
+    }
+
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public Branch name(String name) {
@@ -58,7 +62,7 @@ public class Branch implements Serializable {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public Branch description(String description) {
@@ -71,42 +75,49 @@ public class Branch implements Serializable {
     }
 
     public Set<Semester> getSemesters() {
-        return semesters;
+        return this.semesters;
     }
 
     public Branch semesters(Set<Semester> semesters) {
-        this.semesters = semesters;
+        this.setSemesters(semesters);
         return this;
     }
 
     public Branch addSemester(Semester semester) {
         this.semesters.add(semester);
-        semester.setSemester(this);
+        semester.setBranch(this);
         return this;
     }
 
     public Branch removeSemester(Semester semester) {
         this.semesters.remove(semester);
-        semester.setSemester(null);
+        semester.setBranch(null);
         return this;
     }
 
     public void setSemesters(Set<Semester> semesters) {
+        if (this.semesters != null) {
+            this.semesters.forEach(i -> i.setBranch(null));
+        }
+        if (semesters != null) {
+            semesters.forEach(i -> i.setBranch(this));
+        }
         this.semesters = semesters;
     }
 
-    public Domain getBranches() {
-        return branches;
+    public Domain getDomain() {
+        return this.domain;
     }
 
-    public Branch branches(Domain domain) {
-        this.branches = domain;
+    public Branch domain(Domain domain) {
+        this.setDomain(domain);
         return this;
     }
 
-    public void setBranches(Domain domain) {
-        this.branches = domain;
+    public void setDomain(Domain domain) {
+        this.domain = domain;
     }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -122,7 +133,8 @@ public class Branch implements Serializable {
 
     @Override
     public int hashCode() {
-        return 31;
+        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
+        return getClass().hashCode();
     }
 
     // prettier-ignore

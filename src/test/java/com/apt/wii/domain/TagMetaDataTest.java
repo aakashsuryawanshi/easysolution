@@ -1,13 +1,14 @@
 package com.apt.wii.domain;
 
-import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
-import com.apt.wii.web.rest.TestUtil;
 
-public class TagMetaDataTest {
+import com.apt.wii.web.rest.TestUtil;
+import org.junit.jupiter.api.Test;
+
+class TagMetaDataTest {
 
     @Test
-    public void equalsVerifier() throws Exception {
+    void equalsVerifier() throws Exception {
         TestUtil.equalsVerifier(TagMetaData.class);
         TagMetaData tagMetaData1 = new TagMetaData();
         tagMetaData1.setId(1L);

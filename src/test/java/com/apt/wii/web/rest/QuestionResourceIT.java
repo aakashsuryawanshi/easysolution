@@ -1,35 +1,33 @@
 package com.apt.wii.web.rest;
 
-import com.apt.wii.WiiApp;
-import com.apt.wii.config.TestSecurityConfiguration;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import com.apt.wii.IntegrationTest;
 import com.apt.wii.domain.Question;
 import com.apt.wii.repository.QuestionRepository;
-
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import javax.persistence.EntityManager;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Integration tests for the {@link QuestionResource} REST controller.
  */
-@SpringBootTest(classes = { WiiApp.class, TestSecurityConfiguration.class })
+@IntegrationTest
 @AutoConfigureMockMvc
 @WithMockUser
-public class QuestionResourceIT {
+class QuestionResourceIT {
 
     private static final String DEFAULT_TITLE = "AAAAAAAAAA";
     private static final String UPDATED_TITLE = "BBBBBBBBBB";
@@ -39,6 +37,12 @@ public class QuestionResourceIT {
 
     private static final String DEFAULT_TOPIC = "AAAAAAAAAA";
     private static final String UPDATED_TOPIC = "BBBBBBBBBB";
+
+    private static final String ENTITY_API_URL = "/api/questions";
+    private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
+
+    private static Random random = new Random();
+    private static AtomicLong count = new AtomicLong(random.nextInt() + (2 * Integer.MAX_VALUE));
 
     @Autowired
     private QuestionRepository questionRepository;
@@ -58,12 +62,10 @@ public class QuestionResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Question createEntity(EntityManager em) {
-        Question question = new Question()
-            .title(DEFAULT_TITLE)
-            .description(DEFAULT_DESCRIPTION)
-            .topic(DEFAULT_TOPIC);
+        Question question = new Question().title(DEFAULT_TITLE).description(DEFAULT_DESCRIPTION).topic(DEFAULT_TOPIC);
         return question;
     }
+
     /**
      * Create an updated entity for this test.
      *
@@ -71,10 +73,7 @@ public class QuestionResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Question createUpdatedEntity(EntityManager em) {
-        Question question = new Question()
-            .title(UPDATED_TITLE)
-            .description(UPDATED_DESCRIPTION)
-            .topic(UPDATED_TOPIC);
+        Question question = new Question().title(UPDATED_TITLE).description(UPDATED_DESCRIPTION).topic(UPDATED_TOPIC);
         return question;
     }
 
@@ -85,12 +84,11 @@ public class QuestionResourceIT {
 
     @Test
     @Transactional
-    public void createQuestion() throws Exception {
+    void createQuestion() throws Exception {
         int databaseSizeBeforeCreate = questionRepository.findAll().size();
         // Create the Question
-        restQuestionMockMvc.perform(post("/api/questions").with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(question)))
+        restQuestionMockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(question)))
             .andExpect(status().isCreated());
 
         // Validate the Question in the database
@@ -104,16 +102,15 @@ public class QuestionResourceIT {
 
     @Test
     @Transactional
-    public void createQuestionWithExistingId() throws Exception {
-        int databaseSizeBeforeCreate = questionRepository.findAll().size();
-
+    void createQuestionWithExistingId() throws Exception {
         // Create the Question with an existing ID
         question.setId(1L);
 
+        int databaseSizeBeforeCreate = questionRepository.findAll().size();
+
         // An entity with an existing ID cannot be created, so this API call must fail
-        restQuestionMockMvc.perform(post("/api/questions").with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(question)))
+        restQuestionMockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(question)))
             .andExpect(status().isBadRequest());
 
         // Validate the Question in the database
@@ -121,15 +118,15 @@ public class QuestionResourceIT {
         assertThat(questionList).hasSize(databaseSizeBeforeCreate);
     }
 
-
     @Test
     @Transactional
-    public void getAllQuestions() throws Exception {
+    void getAllQuestions() throws Exception {
         // Initialize the database
         questionRepository.saveAndFlush(question);
 
         // Get all the questionList
-        restQuestionMockMvc.perform(get("/api/questions?sort=id,desc"))
+        restQuestionMockMvc
+            .perform(get(ENTITY_API_URL + "?sort=id,desc"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(question.getId().intValue())))
@@ -137,15 +134,16 @@ public class QuestionResourceIT {
             .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION)))
             .andExpect(jsonPath("$.[*].topic").value(hasItem(DEFAULT_TOPIC)));
     }
-    
+
     @Test
     @Transactional
-    public void getQuestion() throws Exception {
+    void getQuestion() throws Exception {
         // Initialize the database
         questionRepository.saveAndFlush(question);
 
         // Get the question
-        restQuestionMockMvc.perform(get("/api/questions/{id}", question.getId()))
+        restQuestionMockMvc
+            .perform(get(ENTITY_API_URL_ID, question.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.id").value(question.getId().intValue()))
@@ -153,17 +151,17 @@ public class QuestionResourceIT {
             .andExpect(jsonPath("$.description").value(DEFAULT_DESCRIPTION))
             .andExpect(jsonPath("$.topic").value(DEFAULT_TOPIC));
     }
+
     @Test
     @Transactional
-    public void getNonExistingQuestion() throws Exception {
+    void getNonExistingQuestion() throws Exception {
         // Get the question
-        restQuestionMockMvc.perform(get("/api/questions/{id}", Long.MAX_VALUE))
-            .andExpect(status().isNotFound());
+        restQuestionMockMvc.perform(get(ENTITY_API_URL_ID, Long.MAX_VALUE)).andExpect(status().isNotFound());
     }
 
     @Test
     @Transactional
-    public void updateQuestion() throws Exception {
+    void putNewQuestion() throws Exception {
         // Initialize the database
         questionRepository.saveAndFlush(question);
 
@@ -173,14 +171,14 @@ public class QuestionResourceIT {
         Question updatedQuestion = questionRepository.findById(question.getId()).get();
         // Disconnect from session so that the updates on updatedQuestion are not directly saved in db
         em.detach(updatedQuestion);
-        updatedQuestion
-            .title(UPDATED_TITLE)
-            .description(UPDATED_DESCRIPTION)
-            .topic(UPDATED_TOPIC);
+        updatedQuestion.title(UPDATED_TITLE).description(UPDATED_DESCRIPTION).topic(UPDATED_TOPIC);
 
-        restQuestionMockMvc.perform(put("/api/questions").with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(updatedQuestion)))
+        restQuestionMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, updatedQuestion.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(updatedQuestion))
+            )
             .andExpect(status().isOk());
 
         // Validate the Question in the database
@@ -194,13 +192,17 @@ public class QuestionResourceIT {
 
     @Test
     @Transactional
-    public void updateNonExistingQuestion() throws Exception {
+    void putNonExistingQuestion() throws Exception {
         int databaseSizeBeforeUpdate = questionRepository.findAll().size();
+        question.setId(count.incrementAndGet());
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
-        restQuestionMockMvc.perform(put("/api/questions").with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(question)))
+        restQuestionMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, question.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(question))
+            )
             .andExpect(status().isBadRequest());
 
         // Validate the Question in the database
@@ -210,15 +212,169 @@ public class QuestionResourceIT {
 
     @Test
     @Transactional
-    public void deleteQuestion() throws Exception {
+    void putWithIdMismatchQuestion() throws Exception {
+        int databaseSizeBeforeUpdate = questionRepository.findAll().size();
+        question.setId(count.incrementAndGet());
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restQuestionMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, count.incrementAndGet())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(question))
+            )
+            .andExpect(status().isBadRequest());
+
+        // Validate the Question in the database
+        List<Question> questionList = questionRepository.findAll();
+        assertThat(questionList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void putWithMissingIdPathParamQuestion() throws Exception {
+        int databaseSizeBeforeUpdate = questionRepository.findAll().size();
+        question.setId(count.incrementAndGet());
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restQuestionMockMvc
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(question)))
+            .andExpect(status().isMethodNotAllowed());
+
+        // Validate the Question in the database
+        List<Question> questionList = questionRepository.findAll();
+        assertThat(questionList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void partialUpdateQuestionWithPatch() throws Exception {
+        // Initialize the database
+        questionRepository.saveAndFlush(question);
+
+        int databaseSizeBeforeUpdate = questionRepository.findAll().size();
+
+        // Update the question using partial update
+        Question partialUpdatedQuestion = new Question();
+        partialUpdatedQuestion.setId(question.getId());
+
+        partialUpdatedQuestion.description(UPDATED_DESCRIPTION);
+
+        restQuestionMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, partialUpdatedQuestion.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedQuestion))
+            )
+            .andExpect(status().isOk());
+
+        // Validate the Question in the database
+        List<Question> questionList = questionRepository.findAll();
+        assertThat(questionList).hasSize(databaseSizeBeforeUpdate);
+        Question testQuestion = questionList.get(questionList.size() - 1);
+        assertThat(testQuestion.getTitle()).isEqualTo(DEFAULT_TITLE);
+        assertThat(testQuestion.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
+        assertThat(testQuestion.getTopic()).isEqualTo(DEFAULT_TOPIC);
+    }
+
+    @Test
+    @Transactional
+    void fullUpdateQuestionWithPatch() throws Exception {
+        // Initialize the database
+        questionRepository.saveAndFlush(question);
+
+        int databaseSizeBeforeUpdate = questionRepository.findAll().size();
+
+        // Update the question using partial update
+        Question partialUpdatedQuestion = new Question();
+        partialUpdatedQuestion.setId(question.getId());
+
+        partialUpdatedQuestion.title(UPDATED_TITLE).description(UPDATED_DESCRIPTION).topic(UPDATED_TOPIC);
+
+        restQuestionMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, partialUpdatedQuestion.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedQuestion))
+            )
+            .andExpect(status().isOk());
+
+        // Validate the Question in the database
+        List<Question> questionList = questionRepository.findAll();
+        assertThat(questionList).hasSize(databaseSizeBeforeUpdate);
+        Question testQuestion = questionList.get(questionList.size() - 1);
+        assertThat(testQuestion.getTitle()).isEqualTo(UPDATED_TITLE);
+        assertThat(testQuestion.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
+        assertThat(testQuestion.getTopic()).isEqualTo(UPDATED_TOPIC);
+    }
+
+    @Test
+    @Transactional
+    void patchNonExistingQuestion() throws Exception {
+        int databaseSizeBeforeUpdate = questionRepository.findAll().size();
+        question.setId(count.incrementAndGet());
+
+        // If the entity doesn't have an ID, it will throw BadRequestAlertException
+        restQuestionMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, question.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(question))
+            )
+            .andExpect(status().isBadRequest());
+
+        // Validate the Question in the database
+        List<Question> questionList = questionRepository.findAll();
+        assertThat(questionList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void patchWithIdMismatchQuestion() throws Exception {
+        int databaseSizeBeforeUpdate = questionRepository.findAll().size();
+        question.setId(count.incrementAndGet());
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restQuestionMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, count.incrementAndGet())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(question))
+            )
+            .andExpect(status().isBadRequest());
+
+        // Validate the Question in the database
+        List<Question> questionList = questionRepository.findAll();
+        assertThat(questionList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void patchWithMissingIdPathParamQuestion() throws Exception {
+        int databaseSizeBeforeUpdate = questionRepository.findAll().size();
+        question.setId(count.incrementAndGet());
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restQuestionMockMvc
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(question)))
+            .andExpect(status().isMethodNotAllowed());
+
+        // Validate the Question in the database
+        List<Question> questionList = questionRepository.findAll();
+        assertThat(questionList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void deleteQuestion() throws Exception {
         // Initialize the database
         questionRepository.saveAndFlush(question);
 
         int databaseSizeBeforeDelete = questionRepository.findAll().size();
 
         // Delete the question
-        restQuestionMockMvc.perform(delete("/api/questions/{id}", question.getId()).with(csrf())
-            .accept(MediaType.APPLICATION_JSON))
+        restQuestionMockMvc
+            .perform(delete(ENTITY_API_URL_ID, question.getId()).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
         // Validate the database contains one less item

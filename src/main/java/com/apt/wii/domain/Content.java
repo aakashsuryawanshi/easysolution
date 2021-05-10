@@ -1,12 +1,9 @@
 package com.apt.wii.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import javax.persistence.*;
-
-import java.io.Serializable;
-
 import com.apt.wii.domain.enumeration.ContentType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
+import javax.persistence.*;
 
 /**
  * A Content.
@@ -36,8 +33,8 @@ public class Content implements Serializable {
     private Integer seqNum;
 
     @ManyToOne
-    @JsonIgnoreProperties(value = "contents", allowSetters = true)
-    private Question answers;
+    @JsonIgnoreProperties(value = { "tags", "answers", "subject" }, allowSetters = true)
+    private Question question;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -48,8 +45,13 @@ public class Content implements Serializable {
         this.id = id;
     }
 
+    public Content id(Long id) {
+        this.id = id;
+        return this;
+    }
+
     public ContentType getType() {
-        return type;
+        return this.type;
     }
 
     public Content type(ContentType type) {
@@ -62,7 +64,7 @@ public class Content implements Serializable {
     }
 
     public String getText() {
-        return text;
+        return this.text;
     }
 
     public Content text(String text) {
@@ -75,7 +77,7 @@ public class Content implements Serializable {
     }
 
     public String getFilePath() {
-        return filePath;
+        return this.filePath;
     }
 
     public Content filePath(String filePath) {
@@ -88,7 +90,7 @@ public class Content implements Serializable {
     }
 
     public Integer getSeqNum() {
-        return seqNum;
+        return this.seqNum;
     }
 
     public Content seqNum(Integer seqNum) {
@@ -100,18 +102,19 @@ public class Content implements Serializable {
         this.seqNum = seqNum;
     }
 
-    public Question getAnswers() {
-        return answers;
+    public Question getQuestion() {
+        return this.question;
     }
 
-    public Content answers(Question question) {
-        this.answers = question;
+    public Content question(Question question) {
+        this.setQuestion(question);
         return this;
     }
 
-    public void setAnswers(Question question) {
-        this.answers = question;
+    public void setQuestion(Question question) {
+        this.question = question;
     }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -127,7 +130,8 @@ public class Content implements Serializable {
 
     @Override
     public int hashCode() {
-        return 31;
+        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
+        return getClass().hashCode();
     }
 
     // prettier-ignore

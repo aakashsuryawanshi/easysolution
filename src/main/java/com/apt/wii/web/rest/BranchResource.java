@@ -3,20 +3,19 @@ package com.apt.wii.web.rest;
 import com.apt.wii.domain.Branch;
 import com.apt.wii.repository.BranchRepository;
 import com.apt.wii.web.rest.errors.BadRequestAlertException;
-
-import io.github.jhipster.web.util.HeaderUtil;
-import io.github.jhipster.web.util.ResponseUtil;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
+import tech.jhipster.web.util.HeaderUtil;
+import tech.jhipster.web.util.ResponseUtil;
 
 /**
  * REST controller for managing {@link com.apt.wii.domain.Branch}.
@@ -28,7 +27,7 @@ public class BranchResource {
 
     private final Logger log = LoggerFactory.getLogger(BranchResource.class);
 
-    private static final String ENTITY_NAME = "wiiBranch";
+    private static final String ENTITY_NAME = "branch";
 
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
@@ -53,30 +52,92 @@ public class BranchResource {
             throw new BadRequestAlertException("A new branch cannot already have an ID", ENTITY_NAME, "idexists");
         }
         Branch result = branchRepository.save(branch);
-        return ResponseEntity.created(new URI("/api/branches/" + result.getId()))
+        return ResponseEntity
+            .created(new URI("/api/branches/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
 
     /**
-     * {@code PUT  /branches} : Updates an existing branch.
+     * {@code PUT  /branches/:id} : Updates an existing branch.
      *
+     * @param id the id of the branch to save.
      * @param branch the branch to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated branch,
      * or with status {@code 400 (Bad Request)} if the branch is not valid,
      * or with status {@code 500 (Internal Server Error)} if the branch couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/branches")
-    public ResponseEntity<Branch> updateBranch(@RequestBody Branch branch) throws URISyntaxException {
-        log.debug("REST request to update Branch : {}", branch);
+    @PutMapping("/branches/{id}")
+    public ResponseEntity<Branch> updateBranch(@PathVariable(value = "id", required = false) final Long id, @RequestBody Branch branch)
+        throws URISyntaxException {
+        log.debug("REST request to update Branch : {}, {}", id, branch);
         if (branch.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
+        if (!Objects.equals(id, branch.getId())) {
+            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        }
+
+        if (!branchRepository.existsById(id)) {
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
         Branch result = branchRepository.save(branch);
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, branch.getId().toString()))
             .body(result);
+    }
+
+    /**
+     * {@code PATCH  /branches/:id} : Partial updates given fields of an existing branch, field will ignore if it is null
+     *
+     * @param id the id of the branch to save.
+     * @param branch the branch to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated branch,
+     * or with status {@code 400 (Bad Request)} if the branch is not valid,
+     * or with status {@code 404 (Not Found)} if the branch is not found,
+     * or with status {@code 500 (Internal Server Error)} if the branch couldn't be updated.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PatchMapping(value = "/branches/{id}", consumes = "application/merge-patch+json")
+    public ResponseEntity<Branch> partialUpdateBranch(
+        @PathVariable(value = "id", required = false) final Long id,
+        @RequestBody Branch branch
+    ) throws URISyntaxException {
+        log.debug("REST request to partial update Branch partially : {}, {}", id, branch);
+        if (branch.getId() == null) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        }
+        if (!Objects.equals(id, branch.getId())) {
+            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        }
+
+        if (!branchRepository.existsById(id)) {
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
+        Optional<Branch> result = branchRepository
+            .findById(branch.getId())
+            .map(
+                existingBranch -> {
+                    if (branch.getName() != null) {
+                        existingBranch.setName(branch.getName());
+                    }
+                    if (branch.getDescription() != null) {
+                        existingBranch.setDescription(branch.getDescription());
+                    }
+
+                    return existingBranch;
+                }
+            )
+            .map(branchRepository::save);
+
+        return ResponseUtil.wrapOrNotFound(
+            result,
+            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, branch.getId().toString())
+        );
     }
 
     /**
@@ -113,6 +174,9 @@ public class BranchResource {
     public ResponseEntity<Void> deleteBranch(@PathVariable Long id) {
         log.debug("REST request to delete Branch : {}", id);
         branchRepository.deleteById(id);
-        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString())).build();
+        return ResponseEntity
+            .noContent()
+            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
+            .build();
     }
 }

@@ -1,12 +1,10 @@
 package com.apt.wii.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import javax.persistence.*;
-
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.*;
 
 /**
  * A Semester.
@@ -28,12 +26,13 @@ public class Semester implements Serializable {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "subject")
+    @OneToMany(mappedBy = "semester")
+    @JsonIgnoreProperties(value = { "questions", "semester" }, allowSetters = true)
     private Set<Subject> subjects = new HashSet<>();
 
     @ManyToOne
-    @JsonIgnoreProperties(value = "semesters", allowSetters = true)
-    private Branch semester;
+    @JsonIgnoreProperties(value = { "semesters", "domain" }, allowSetters = true)
+    private Branch branch;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -44,8 +43,13 @@ public class Semester implements Serializable {
         this.id = id;
     }
 
+    public Semester id(Long id) {
+        this.id = id;
+        return this;
+    }
+
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public Semester name(String name) {
@@ -58,7 +62,7 @@ public class Semester implements Serializable {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public Semester description(String description) {
@@ -71,42 +75,49 @@ public class Semester implements Serializable {
     }
 
     public Set<Subject> getSubjects() {
-        return subjects;
+        return this.subjects;
     }
 
     public Semester subjects(Set<Subject> subjects) {
-        this.subjects = subjects;
+        this.setSubjects(subjects);
         return this;
     }
 
     public Semester addSubject(Subject subject) {
         this.subjects.add(subject);
-        subject.setSubject(this);
+        subject.setSemester(this);
         return this;
     }
 
     public Semester removeSubject(Subject subject) {
         this.subjects.remove(subject);
-        subject.setSubject(null);
+        subject.setSemester(null);
         return this;
     }
 
     public void setSubjects(Set<Subject> subjects) {
+        if (this.subjects != null) {
+            this.subjects.forEach(i -> i.setSemester(null));
+        }
+        if (subjects != null) {
+            subjects.forEach(i -> i.setSemester(this));
+        }
         this.subjects = subjects;
     }
 
-    public Branch getSemester() {
-        return semester;
+    public Branch getBranch() {
+        return this.branch;
     }
 
-    public Semester semester(Branch branch) {
-        this.semester = branch;
+    public Semester branch(Branch branch) {
+        this.setBranch(branch);
         return this;
     }
 
-    public void setSemester(Branch branch) {
-        this.semester = branch;
+    public void setBranch(Branch branch) {
+        this.branch = branch;
     }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -122,7 +133,8 @@ public class Semester implements Serializable {
 
     @Override
     public int hashCode() {
-        return 31;
+        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
+        return getClass().hashCode();
     }
 
     // prettier-ignore

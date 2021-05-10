@@ -14,11 +14,10 @@
     {
       "relationshipType": "one-to-many",
       "otherEntityName": "branch",
-      "otherEntityRelationshipName": "branches",
-      "relationshipName": "branch"
+      "otherEntityRelationshipName": "domain",
+      "relationshipName": "branches"
     }
   ],
-  "changelogDate": "20210508155028",
   "javadoc": "requirements\\nER diagram\\nclass diagram",
   "entityTableName": "domain",
   "dto": "no",
@@ -28,7 +27,6 @@
   "fluentMethods": true,
   "readOnly": false,
   "embedded": false,
-  "clientRootFolder": "wii",
   "applications": "*",
-  "microserviceName": "wii"
+  "changelogDate": "20210510162852"
 }

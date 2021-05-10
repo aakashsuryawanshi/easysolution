@@ -1,12 +1,11 @@
 package com.apt.wii.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModel;
-
-import javax.persistence.*;
-
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.*;
 
 /**
  * requirements\nER diagram\nclass diagram
@@ -29,7 +28,8 @@ public class Domain implements Serializable {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "branches")
+    @OneToMany(mappedBy = "domain")
+    @JsonIgnoreProperties(value = { "semesters", "domain" }, allowSetters = true)
     private Set<Branch> branches = new HashSet<>();
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
@@ -41,8 +41,13 @@ public class Domain implements Serializable {
         this.id = id;
     }
 
+    public Domain id(Long id) {
+        this.id = id;
+        return this;
+    }
+
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public Domain name(String name) {
@@ -55,7 +60,7 @@ public class Domain implements Serializable {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public Domain description(String description) {
@@ -68,29 +73,36 @@ public class Domain implements Serializable {
     }
 
     public Set<Branch> getBranches() {
-        return branches;
+        return this.branches;
     }
 
     public Domain branches(Set<Branch> branches) {
-        this.branches = branches;
+        this.setBranches(branches);
         return this;
     }
 
-    public Domain addBranch(Branch branch) {
+    public Domain addBranches(Branch branch) {
         this.branches.add(branch);
-        branch.setBranches(this);
+        branch.setDomain(this);
         return this;
     }
 
-    public Domain removeBranch(Branch branch) {
+    public Domain removeBranches(Branch branch) {
         this.branches.remove(branch);
-        branch.setBranches(null);
+        branch.setDomain(null);
         return this;
     }
 
     public void setBranches(Set<Branch> branches) {
+        if (this.branches != null) {
+            this.branches.forEach(i -> i.setDomain(null));
+        }
+        if (branches != null) {
+            branches.forEach(i -> i.setDomain(this));
+        }
         this.branches = branches;
     }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -106,7 +118,8 @@ public class Domain implements Serializable {
 
     @Override
     public int hashCode() {
-        return 31;
+        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
+        return getClass().hashCode();
     }
 
     // prettier-ignore

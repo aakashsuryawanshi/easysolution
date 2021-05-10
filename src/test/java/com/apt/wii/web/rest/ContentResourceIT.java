@@ -1,36 +1,34 @@
 package com.apt.wii.web.rest;
 
-import com.apt.wii.WiiApp;
-import com.apt.wii.config.TestSecurityConfiguration;
-import com.apt.wii.domain.Content;
-import com.apt.wii.repository.ContentRepository;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.apt.wii.IntegrationTest;
+import com.apt.wii.domain.Content;
+import com.apt.wii.domain.enumeration.ContentType;
+import com.apt.wii.repository.ContentRepository;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import javax.persistence.EntityManager;
-import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import com.apt.wii.domain.enumeration.ContentType;
 /**
  * Integration tests for the {@link ContentResource} REST controller.
  */
-@SpringBootTest(classes = { WiiApp.class, TestSecurityConfiguration.class })
+@IntegrationTest
 @AutoConfigureMockMvc
 @WithMockUser
-public class ContentResourceIT {
+class ContentResourceIT {
 
     private static final ContentType DEFAULT_TYPE = ContentType.PARA;
     private static final ContentType UPDATED_TYPE = ContentType.IMAGE;
@@ -43,6 +41,12 @@ public class ContentResourceIT {
 
     private static final Integer DEFAULT_SEQ_NUM = 1;
     private static final Integer UPDATED_SEQ_NUM = 2;
+
+    private static final String ENTITY_API_URL = "/api/contents";
+    private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
+
+    private static Random random = new Random();
+    private static AtomicLong count = new AtomicLong(random.nextInt() + (2 * Integer.MAX_VALUE));
 
     @Autowired
     private ContentRepository contentRepository;
@@ -62,13 +66,10 @@ public class ContentResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Content createEntity(EntityManager em) {
-        Content content = new Content()
-            .type(DEFAULT_TYPE)
-            .text(DEFAULT_TEXT)
-            .filePath(DEFAULT_FILE_PATH)
-            .seqNum(DEFAULT_SEQ_NUM);
+        Content content = new Content().type(DEFAULT_TYPE).text(DEFAULT_TEXT).filePath(DEFAULT_FILE_PATH).seqNum(DEFAULT_SEQ_NUM);
         return content;
     }
+
     /**
      * Create an updated entity for this test.
      *
@@ -76,11 +77,7 @@ public class ContentResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Content createUpdatedEntity(EntityManager em) {
-        Content content = new Content()
-            .type(UPDATED_TYPE)
-            .text(UPDATED_TEXT)
-            .filePath(UPDATED_FILE_PATH)
-            .seqNum(UPDATED_SEQ_NUM);
+        Content content = new Content().type(UPDATED_TYPE).text(UPDATED_TEXT).filePath(UPDATED_FILE_PATH).seqNum(UPDATED_SEQ_NUM);
         return content;
     }
 
@@ -91,12 +88,11 @@ public class ContentResourceIT {
 
     @Test
     @Transactional
-    public void createContent() throws Exception {
+    void createContent() throws Exception {
         int databaseSizeBeforeCreate = contentRepository.findAll().size();
         // Create the Content
-        restContentMockMvc.perform(post("/api/contents").with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(content)))
+        restContentMockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(content)))
             .andExpect(status().isCreated());
 
         // Validate the Content in the database
@@ -111,16 +107,15 @@ public class ContentResourceIT {
 
     @Test
     @Transactional
-    public void createContentWithExistingId() throws Exception {
-        int databaseSizeBeforeCreate = contentRepository.findAll().size();
-
+    void createContentWithExistingId() throws Exception {
         // Create the Content with an existing ID
         content.setId(1L);
 
+        int databaseSizeBeforeCreate = contentRepository.findAll().size();
+
         // An entity with an existing ID cannot be created, so this API call must fail
-        restContentMockMvc.perform(post("/api/contents").with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(content)))
+        restContentMockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(content)))
             .andExpect(status().isBadRequest());
 
         // Validate the Content in the database
@@ -128,15 +123,15 @@ public class ContentResourceIT {
         assertThat(contentList).hasSize(databaseSizeBeforeCreate);
     }
 
-
     @Test
     @Transactional
-    public void getAllContents() throws Exception {
+    void getAllContents() throws Exception {
         // Initialize the database
         contentRepository.saveAndFlush(content);
 
         // Get all the contentList
-        restContentMockMvc.perform(get("/api/contents?sort=id,desc"))
+        restContentMockMvc
+            .perform(get(ENTITY_API_URL + "?sort=id,desc"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(content.getId().intValue())))
@@ -145,15 +140,16 @@ public class ContentResourceIT {
             .andExpect(jsonPath("$.[*].filePath").value(hasItem(DEFAULT_FILE_PATH)))
             .andExpect(jsonPath("$.[*].seqNum").value(hasItem(DEFAULT_SEQ_NUM)));
     }
-    
+
     @Test
     @Transactional
-    public void getContent() throws Exception {
+    void getContent() throws Exception {
         // Initialize the database
         contentRepository.saveAndFlush(content);
 
         // Get the content
-        restContentMockMvc.perform(get("/api/contents/{id}", content.getId()))
+        restContentMockMvc
+            .perform(get(ENTITY_API_URL_ID, content.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.id").value(content.getId().intValue()))
@@ -162,17 +158,17 @@ public class ContentResourceIT {
             .andExpect(jsonPath("$.filePath").value(DEFAULT_FILE_PATH))
             .andExpect(jsonPath("$.seqNum").value(DEFAULT_SEQ_NUM));
     }
+
     @Test
     @Transactional
-    public void getNonExistingContent() throws Exception {
+    void getNonExistingContent() throws Exception {
         // Get the content
-        restContentMockMvc.perform(get("/api/contents/{id}", Long.MAX_VALUE))
-            .andExpect(status().isNotFound());
+        restContentMockMvc.perform(get(ENTITY_API_URL_ID, Long.MAX_VALUE)).andExpect(status().isNotFound());
     }
 
     @Test
     @Transactional
-    public void updateContent() throws Exception {
+    void putNewContent() throws Exception {
         // Initialize the database
         contentRepository.saveAndFlush(content);
 
@@ -182,15 +178,14 @@ public class ContentResourceIT {
         Content updatedContent = contentRepository.findById(content.getId()).get();
         // Disconnect from session so that the updates on updatedContent are not directly saved in db
         em.detach(updatedContent);
-        updatedContent
-            .type(UPDATED_TYPE)
-            .text(UPDATED_TEXT)
-            .filePath(UPDATED_FILE_PATH)
-            .seqNum(UPDATED_SEQ_NUM);
+        updatedContent.type(UPDATED_TYPE).text(UPDATED_TEXT).filePath(UPDATED_FILE_PATH).seqNum(UPDATED_SEQ_NUM);
 
-        restContentMockMvc.perform(put("/api/contents").with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(updatedContent)))
+        restContentMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, updatedContent.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(updatedContent))
+            )
             .andExpect(status().isOk());
 
         // Validate the Content in the database
@@ -205,13 +200,17 @@ public class ContentResourceIT {
 
     @Test
     @Transactional
-    public void updateNonExistingContent() throws Exception {
+    void putNonExistingContent() throws Exception {
         int databaseSizeBeforeUpdate = contentRepository.findAll().size();
+        content.setId(count.incrementAndGet());
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
-        restContentMockMvc.perform(put("/api/contents").with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(content)))
+        restContentMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, content.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(content))
+            )
             .andExpect(status().isBadRequest());
 
         // Validate the Content in the database
@@ -221,15 +220,171 @@ public class ContentResourceIT {
 
     @Test
     @Transactional
-    public void deleteContent() throws Exception {
+    void putWithIdMismatchContent() throws Exception {
+        int databaseSizeBeforeUpdate = contentRepository.findAll().size();
+        content.setId(count.incrementAndGet());
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restContentMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, count.incrementAndGet())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(content))
+            )
+            .andExpect(status().isBadRequest());
+
+        // Validate the Content in the database
+        List<Content> contentList = contentRepository.findAll();
+        assertThat(contentList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void putWithMissingIdPathParamContent() throws Exception {
+        int databaseSizeBeforeUpdate = contentRepository.findAll().size();
+        content.setId(count.incrementAndGet());
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restContentMockMvc
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(content)))
+            .andExpect(status().isMethodNotAllowed());
+
+        // Validate the Content in the database
+        List<Content> contentList = contentRepository.findAll();
+        assertThat(contentList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void partialUpdateContentWithPatch() throws Exception {
+        // Initialize the database
+        contentRepository.saveAndFlush(content);
+
+        int databaseSizeBeforeUpdate = contentRepository.findAll().size();
+
+        // Update the content using partial update
+        Content partialUpdatedContent = new Content();
+        partialUpdatedContent.setId(content.getId());
+
+        partialUpdatedContent.type(UPDATED_TYPE).text(UPDATED_TEXT).filePath(UPDATED_FILE_PATH).seqNum(UPDATED_SEQ_NUM);
+
+        restContentMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, partialUpdatedContent.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedContent))
+            )
+            .andExpect(status().isOk());
+
+        // Validate the Content in the database
+        List<Content> contentList = contentRepository.findAll();
+        assertThat(contentList).hasSize(databaseSizeBeforeUpdate);
+        Content testContent = contentList.get(contentList.size() - 1);
+        assertThat(testContent.getType()).isEqualTo(UPDATED_TYPE);
+        assertThat(testContent.getText()).isEqualTo(UPDATED_TEXT);
+        assertThat(testContent.getFilePath()).isEqualTo(UPDATED_FILE_PATH);
+        assertThat(testContent.getSeqNum()).isEqualTo(UPDATED_SEQ_NUM);
+    }
+
+    @Test
+    @Transactional
+    void fullUpdateContentWithPatch() throws Exception {
+        // Initialize the database
+        contentRepository.saveAndFlush(content);
+
+        int databaseSizeBeforeUpdate = contentRepository.findAll().size();
+
+        // Update the content using partial update
+        Content partialUpdatedContent = new Content();
+        partialUpdatedContent.setId(content.getId());
+
+        partialUpdatedContent.type(UPDATED_TYPE).text(UPDATED_TEXT).filePath(UPDATED_FILE_PATH).seqNum(UPDATED_SEQ_NUM);
+
+        restContentMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, partialUpdatedContent.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedContent))
+            )
+            .andExpect(status().isOk());
+
+        // Validate the Content in the database
+        List<Content> contentList = contentRepository.findAll();
+        assertThat(contentList).hasSize(databaseSizeBeforeUpdate);
+        Content testContent = contentList.get(contentList.size() - 1);
+        assertThat(testContent.getType()).isEqualTo(UPDATED_TYPE);
+        assertThat(testContent.getText()).isEqualTo(UPDATED_TEXT);
+        assertThat(testContent.getFilePath()).isEqualTo(UPDATED_FILE_PATH);
+        assertThat(testContent.getSeqNum()).isEqualTo(UPDATED_SEQ_NUM);
+    }
+
+    @Test
+    @Transactional
+    void patchNonExistingContent() throws Exception {
+        int databaseSizeBeforeUpdate = contentRepository.findAll().size();
+        content.setId(count.incrementAndGet());
+
+        // If the entity doesn't have an ID, it will throw BadRequestAlertException
+        restContentMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, content.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(content))
+            )
+            .andExpect(status().isBadRequest());
+
+        // Validate the Content in the database
+        List<Content> contentList = contentRepository.findAll();
+        assertThat(contentList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void patchWithIdMismatchContent() throws Exception {
+        int databaseSizeBeforeUpdate = contentRepository.findAll().size();
+        content.setId(count.incrementAndGet());
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restContentMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, count.incrementAndGet())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(content))
+            )
+            .andExpect(status().isBadRequest());
+
+        // Validate the Content in the database
+        List<Content> contentList = contentRepository.findAll();
+        assertThat(contentList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void patchWithMissingIdPathParamContent() throws Exception {
+        int databaseSizeBeforeUpdate = contentRepository.findAll().size();
+        content.setId(count.incrementAndGet());
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restContentMockMvc
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(content)))
+            .andExpect(status().isMethodNotAllowed());
+
+        // Validate the Content in the database
+        List<Content> contentList = contentRepository.findAll();
+        assertThat(contentList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void deleteContent() throws Exception {
         // Initialize the database
         contentRepository.saveAndFlush(content);
 
         int databaseSizeBeforeDelete = contentRepository.findAll().size();
 
         // Delete the content
-        restContentMockMvc.perform(delete("/api/contents/{id}", content.getId()).with(csrf())
-            .accept(MediaType.APPLICATION_JSON))
+        restContentMockMvc
+            .perform(delete(ENTITY_API_URL_ID, content.getId()).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
         // Validate the database contains one less item

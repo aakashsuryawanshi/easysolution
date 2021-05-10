@@ -1,13 +1,14 @@
 package com.apt.wii.domain;
 
-import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
-import com.apt.wii.web.rest.TestUtil;
 
-public class QuestionTest {
+import com.apt.wii.web.rest.TestUtil;
+import org.junit.jupiter.api.Test;
+
+class QuestionTest {
 
     @Test
-    public void equalsVerifier() throws Exception {
+    void equalsVerifier() throws Exception {
         TestUtil.equalsVerifier(Question.class);
         Question question1 = new Question();
         question1.setId(1L);

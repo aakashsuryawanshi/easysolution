@@ -18,24 +18,22 @@
     {
       "relationshipType": "one-to-many",
       "otherEntityName": "tagMetaData",
-      "otherEntityRelationshipName": "tags",
-      "relationshipName": "tagMetaData"
+      "otherEntityRelationshipName": "question",
+      "relationshipName": "tags"
     },
     {
       "relationshipType": "one-to-many",
       "otherEntityName": "content",
-      "otherEntityRelationshipName": "answers",
-      "relationshipName": "content"
+      "otherEntityRelationshipName": "question",
+      "relationshipName": "answers"
     },
     {
       "relationshipType": "many-to-one",
       "otherEntityName": "subject",
       "otherEntityRelationshipName": "question",
-      "relationshipName": "question",
-      "otherEntityField": "id"
+      "relationshipName": "subject"
     }
   ],
-  "changelogDate": "20210508155428",
   "javadoc": "Task entity.\\n@author The JHipster team.",
   "entityTableName": "question",
   "dto": "no",
@@ -45,7 +43,6 @@
   "fluentMethods": true,
   "readOnly": false,
   "embedded": false,
-  "clientRootFolder": "wii",
   "applications": "*",
-  "microserviceName": "wii"
+  "changelogDate": "20210510162856"
 }

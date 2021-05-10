@@ -2,12 +2,10 @@ package com.apt.wii.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModel;
-
-import javax.persistence.*;
-
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.*;
 
 /**
  * Task entity.\n@author The JHipster team.
@@ -33,15 +31,17 @@ public class Question implements Serializable {
     @Column(name = "topic")
     private String topic;
 
-    @OneToMany(mappedBy = "tags")
-    private Set<TagMetaData> tagMetaData = new HashSet<>();
+    @OneToMany(mappedBy = "question")
+    @JsonIgnoreProperties(value = { "question" }, allowSetters = true)
+    private Set<TagMetaData> tags = new HashSet<>();
 
-    @OneToMany(mappedBy = "answers")
-    private Set<Content> contents = new HashSet<>();
+    @OneToMany(mappedBy = "question")
+    @JsonIgnoreProperties(value = { "question" }, allowSetters = true)
+    private Set<Content> answers = new HashSet<>();
 
     @ManyToOne
-    @JsonIgnoreProperties(value = "questions", allowSetters = true)
-    private Subject question;
+    @JsonIgnoreProperties(value = { "questions", "semester" }, allowSetters = true)
+    private Subject subject;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -52,8 +52,13 @@ public class Question implements Serializable {
         this.id = id;
     }
 
+    public Question id(Long id) {
+        this.id = id;
+        return this;
+    }
+
     public String getTitle() {
-        return title;
+        return this.title;
     }
 
     public Question title(String title) {
@@ -66,7 +71,7 @@ public class Question implements Serializable {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public Question description(String description) {
@@ -79,7 +84,7 @@ public class Question implements Serializable {
     }
 
     public String getTopic() {
-        return topic;
+        return this.topic;
     }
 
     public Question topic(String topic) {
@@ -91,68 +96,81 @@ public class Question implements Serializable {
         this.topic = topic;
     }
 
-    public Set<TagMetaData> getTagMetaData() {
-        return tagMetaData;
+    public Set<TagMetaData> getTags() {
+        return this.tags;
     }
 
-    public Question tagMetaData(Set<TagMetaData> tagMetaData) {
-        this.tagMetaData = tagMetaData;
+    public Question tags(Set<TagMetaData> tagMetaData) {
+        this.setTags(tagMetaData);
         return this;
     }
 
-    public Question addTagMetaData(TagMetaData tagMetaData) {
-        this.tagMetaData.add(tagMetaData);
-        tagMetaData.setTags(this);
+    public Question addTags(TagMetaData tagMetaData) {
+        this.tags.add(tagMetaData);
+        tagMetaData.setQuestion(this);
         return this;
     }
 
-    public Question removeTagMetaData(TagMetaData tagMetaData) {
-        this.tagMetaData.remove(tagMetaData);
-        tagMetaData.setTags(null);
+    public Question removeTags(TagMetaData tagMetaData) {
+        this.tags.remove(tagMetaData);
+        tagMetaData.setQuestion(null);
         return this;
     }
 
-    public void setTagMetaData(Set<TagMetaData> tagMetaData) {
-        this.tagMetaData = tagMetaData;
+    public void setTags(Set<TagMetaData> tagMetaData) {
+        if (this.tags != null) {
+            this.tags.forEach(i -> i.setQuestion(null));
+        }
+        if (tagMetaData != null) {
+            tagMetaData.forEach(i -> i.setQuestion(this));
+        }
+        this.tags = tagMetaData;
     }
 
-    public Set<Content> getContents() {
-        return contents;
+    public Set<Content> getAnswers() {
+        return this.answers;
     }
 
-    public Question contents(Set<Content> contents) {
-        this.contents = contents;
+    public Question answers(Set<Content> contents) {
+        this.setAnswers(contents);
         return this;
     }
 
-    public Question addContent(Content content) {
-        this.contents.add(content);
-        content.setAnswers(this);
+    public Question addAnswers(Content content) {
+        this.answers.add(content);
+        content.setQuestion(this);
         return this;
     }
 
-    public Question removeContent(Content content) {
-        this.contents.remove(content);
-        content.setAnswers(null);
+    public Question removeAnswers(Content content) {
+        this.answers.remove(content);
+        content.setQuestion(null);
         return this;
     }
 
-    public void setContents(Set<Content> contents) {
-        this.contents = contents;
+    public void setAnswers(Set<Content> contents) {
+        if (this.answers != null) {
+            this.answers.forEach(i -> i.setQuestion(null));
+        }
+        if (contents != null) {
+            contents.forEach(i -> i.setQuestion(this));
+        }
+        this.answers = contents;
     }
 
-    public Subject getQuestion() {
-        return question;
+    public Subject getSubject() {
+        return this.subject;
     }
 
-    public Question question(Subject subject) {
-        this.question = subject;
+    public Question subject(Subject subject) {
+        this.setSubject(subject);
         return this;
     }
 
-    public void setQuestion(Subject subject) {
-        this.question = subject;
+    public void setSubject(Subject subject) {
+        this.subject = subject;
     }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -168,7 +186,8 @@ public class Question implements Serializable {
 
     @Override
     public int hashCode() {
-        return 31;
+        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
+        return getClass().hashCode();
     }
 
     // prettier-ignore

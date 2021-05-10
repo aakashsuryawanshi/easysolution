@@ -14,18 +14,16 @@
     {
       "relationshipType": "one-to-many",
       "otherEntityName": "subject",
-      "otherEntityRelationshipName": "subject",
+      "otherEntityRelationshipName": "semester",
       "relationshipName": "subject"
     },
     {
       "relationshipType": "many-to-one",
       "otherEntityName": "branch",
       "otherEntityRelationshipName": "semester",
-      "relationshipName": "semester",
-      "otherEntityField": "id"
+      "relationshipName": "branch"
     }
   ],
-  "changelogDate": "20210508155228",
   "entityTableName": "semester",
   "dto": "no",
   "pagination": "no",
@@ -34,7 +32,6 @@
   "fluentMethods": true,
   "readOnly": false,
   "embedded": false,
-  "clientRootFolder": "wii",
   "applications": "*",
-  "microserviceName": "wii"
+  "changelogDate": "20210510162854"
 }

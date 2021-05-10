@@ -1,13 +1,14 @@
 package com.apt.wii.domain;
 
-import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
-import com.apt.wii.web.rest.TestUtil;
 
-public class DomainTest {
+import com.apt.wii.web.rest.TestUtil;
+import org.junit.jupiter.api.Test;
+
+class DomainTest {
 
     @Test
-    public void equalsVerifier() throws Exception {
+    void equalsVerifier() throws Exception {
         TestUtil.equalsVerifier(Domain.class);
         Domain domain1 = new Domain();
         domain1.setId(1L);

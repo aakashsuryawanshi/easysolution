@@ -3,20 +3,19 @@ package com.apt.wii.web.rest;
 import com.apt.wii.domain.TagMetaData;
 import com.apt.wii.repository.TagMetaDataRepository;
 import com.apt.wii.web.rest.errors.BadRequestAlertException;
-
-import io.github.jhipster.web.util.HeaderUtil;
-import io.github.jhipster.web.util.ResponseUtil;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
+import tech.jhipster.web.util.HeaderUtil;
+import tech.jhipster.web.util.ResponseUtil;
 
 /**
  * REST controller for managing {@link com.apt.wii.domain.TagMetaData}.
@@ -28,7 +27,7 @@ public class TagMetaDataResource {
 
     private final Logger log = LoggerFactory.getLogger(TagMetaDataResource.class);
 
-    private static final String ENTITY_NAME = "wiiTagMetaData";
+    private static final String ENTITY_NAME = "tagMetaData";
 
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
@@ -53,30 +52,94 @@ public class TagMetaDataResource {
             throw new BadRequestAlertException("A new tagMetaData cannot already have an ID", ENTITY_NAME, "idexists");
         }
         TagMetaData result = tagMetaDataRepository.save(tagMetaData);
-        return ResponseEntity.created(new URI("/api/tag-meta-data/" + result.getId()))
+        return ResponseEntity
+            .created(new URI("/api/tag-meta-data/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
 
     /**
-     * {@code PUT  /tag-meta-data} : Updates an existing tagMetaData.
+     * {@code PUT  /tag-meta-data/:id} : Updates an existing tagMetaData.
      *
+     * @param id the id of the tagMetaData to save.
      * @param tagMetaData the tagMetaData to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated tagMetaData,
      * or with status {@code 400 (Bad Request)} if the tagMetaData is not valid,
      * or with status {@code 500 (Internal Server Error)} if the tagMetaData couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/tag-meta-data")
-    public ResponseEntity<TagMetaData> updateTagMetaData(@RequestBody TagMetaData tagMetaData) throws URISyntaxException {
-        log.debug("REST request to update TagMetaData : {}", tagMetaData);
+    @PutMapping("/tag-meta-data/{id}")
+    public ResponseEntity<TagMetaData> updateTagMetaData(
+        @PathVariable(value = "id", required = false) final Long id,
+        @RequestBody TagMetaData tagMetaData
+    ) throws URISyntaxException {
+        log.debug("REST request to update TagMetaData : {}, {}", id, tagMetaData);
         if (tagMetaData.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
+        if (!Objects.equals(id, tagMetaData.getId())) {
+            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        }
+
+        if (!tagMetaDataRepository.existsById(id)) {
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
         TagMetaData result = tagMetaDataRepository.save(tagMetaData);
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, tagMetaData.getId().toString()))
             .body(result);
+    }
+
+    /**
+     * {@code PATCH  /tag-meta-data/:id} : Partial updates given fields of an existing tagMetaData, field will ignore if it is null
+     *
+     * @param id the id of the tagMetaData to save.
+     * @param tagMetaData the tagMetaData to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated tagMetaData,
+     * or with status {@code 400 (Bad Request)} if the tagMetaData is not valid,
+     * or with status {@code 404 (Not Found)} if the tagMetaData is not found,
+     * or with status {@code 500 (Internal Server Error)} if the tagMetaData couldn't be updated.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PatchMapping(value = "/tag-meta-data/{id}", consumes = "application/merge-patch+json")
+    public ResponseEntity<TagMetaData> partialUpdateTagMetaData(
+        @PathVariable(value = "id", required = false) final Long id,
+        @RequestBody TagMetaData tagMetaData
+    ) throws URISyntaxException {
+        log.debug("REST request to partial update TagMetaData partially : {}, {}", id, tagMetaData);
+        if (tagMetaData.getId() == null) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        }
+        if (!Objects.equals(id, tagMetaData.getId())) {
+            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        }
+
+        if (!tagMetaDataRepository.existsById(id)) {
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
+        Optional<TagMetaData> result = tagMetaDataRepository
+            .findById(tagMetaData.getId())
+            .map(
+                existingTagMetaData -> {
+                    if (tagMetaData.getKey() != null) {
+                        existingTagMetaData.setKey(tagMetaData.getKey());
+                    }
+                    if (tagMetaData.getValue() != null) {
+                        existingTagMetaData.setValue(tagMetaData.getValue());
+                    }
+
+                    return existingTagMetaData;
+                }
+            )
+            .map(tagMetaDataRepository::save);
+
+        return ResponseUtil.wrapOrNotFound(
+            result,
+            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, tagMetaData.getId().toString())
+        );
     }
 
     /**
@@ -113,6 +176,9 @@ public class TagMetaDataResource {
     public ResponseEntity<Void> deleteTagMetaData(@PathVariable Long id) {
         log.debug("REST request to delete TagMetaData : {}", id);
         tagMetaDataRepository.deleteById(id);
-        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString())).build();
+        return ResponseEntity
+            .noContent()
+            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
+            .build();
     }
 }

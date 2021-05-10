@@ -1,13 +1,14 @@
 package com.apt.wii.domain;
 
-import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
-import com.apt.wii.web.rest.TestUtil;
 
-public class SemesterTest {
+import com.apt.wii.web.rest.TestUtil;
+import org.junit.jupiter.api.Test;
+
+class SemesterTest {
 
     @Test
-    public void equalsVerifier() throws Exception {
+    void equalsVerifier() throws Exception {
         TestUtil.equalsVerifier(Semester.class);
         Semester semester1 = new Semester();
         semester1.setId(1L);

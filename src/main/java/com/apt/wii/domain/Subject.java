@@ -1,12 +1,10 @@
 package com.apt.wii.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import javax.persistence.*;
-
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.*;
 
 /**
  * A Subject.
@@ -28,12 +26,13 @@ public class Subject implements Serializable {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "question")
+    @OneToMany(mappedBy = "subject")
+    @JsonIgnoreProperties(value = { "tags", "answers", "subject" }, allowSetters = true)
     private Set<Question> questions = new HashSet<>();
 
     @ManyToOne
-    @JsonIgnoreProperties(value = "subjects", allowSetters = true)
-    private Semester subject;
+    @JsonIgnoreProperties(value = { "subjects", "branch" }, allowSetters = true)
+    private Semester semester;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -44,8 +43,13 @@ public class Subject implements Serializable {
         this.id = id;
     }
 
+    public Subject id(Long id) {
+        this.id = id;
+        return this;
+    }
+
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public Subject name(String name) {
@@ -58,7 +62,7 @@ public class Subject implements Serializable {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public Subject description(String description) {
@@ -71,42 +75,49 @@ public class Subject implements Serializable {
     }
 
     public Set<Question> getQuestions() {
-        return questions;
+        return this.questions;
     }
 
     public Subject questions(Set<Question> questions) {
-        this.questions = questions;
+        this.setQuestions(questions);
         return this;
     }
 
     public Subject addQuestion(Question question) {
         this.questions.add(question);
-        question.setQuestion(this);
+        question.setSubject(this);
         return this;
     }
 
     public Subject removeQuestion(Question question) {
         this.questions.remove(question);
-        question.setQuestion(null);
+        question.setSubject(null);
         return this;
     }
 
     public void setQuestions(Set<Question> questions) {
+        if (this.questions != null) {
+            this.questions.forEach(i -> i.setSubject(null));
+        }
+        if (questions != null) {
+            questions.forEach(i -> i.setSubject(this));
+        }
         this.questions = questions;
     }
 
-    public Semester getSubject() {
-        return subject;
+    public Semester getSemester() {
+        return this.semester;
     }
 
-    public Subject subject(Semester semester) {
-        this.subject = semester;
+    public Subject semester(Semester semester) {
+        this.setSemester(semester);
         return this;
     }
 
-    public void setSubject(Semester semester) {
-        this.subject = semester;
+    public void setSemester(Semester semester) {
+        this.semester = semester;
     }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -122,7 +133,8 @@ public class Subject implements Serializable {
 
     @Override
     public int hashCode() {
-        return 31;
+        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
+        return getClass().hashCode();
     }
 
     // prettier-ignore

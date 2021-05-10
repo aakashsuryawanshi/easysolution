@@ -1,13 +1,14 @@
 package com.apt.wii.domain;
 
-import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
-import com.apt.wii.web.rest.TestUtil;
 
-public class BranchTest {
+import com.apt.wii.web.rest.TestUtil;
+import org.junit.jupiter.api.Test;
+
+class BranchTest {
 
     @Test
-    public void equalsVerifier() throws Exception {
+    void equalsVerifier() throws Exception {
         TestUtil.equalsVerifier(Branch.class);
         Branch branch1 = new Branch();
         branch1.setId(1L);

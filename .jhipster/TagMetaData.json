@@ -14,12 +14,10 @@
     {
       "relationshipType": "many-to-one",
       "otherEntityName": "question",
-      "otherEntityRelationshipName": "tagMetaData",
-      "relationshipName": "tags",
-      "otherEntityField": "id"
+      "otherEntityRelationshipName": "tags",
+      "relationshipName": "question"
     }
   ],
-  "changelogDate": "20210508155528",
   "javadoc": "The Employee entity.",
   "entityTableName": "tag_meta_data",
   "dto": "no",
@@ -29,7 +27,6 @@
   "fluentMethods": true,
   "readOnly": false,
   "embedded": false,
-  "clientRootFolder": "wii",
   "applications": "*",
-  "microserviceName": "wii"
+  "changelogDate": "20210510162857"
 }

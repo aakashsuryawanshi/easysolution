@@ -54,12 +54,12 @@ enum ContentType{
 }
 
 relationship OneToMany {
-	Domain to Branch{branches},
-	Branch to Semester{semester}
-    Semester to Subject{subject}
-    Subject to Question{question}
-    Question to TagMetaData{tags}
-    Question to Content{answers}
+	Domain{branches} to Branch,
+	Branch{semester} to Semester
+    Semester{subject} to Subject
+    Subject{question} to Question
+    Question{tags} to TagMetaData
+    Question{answers} to Content
 }
 
 

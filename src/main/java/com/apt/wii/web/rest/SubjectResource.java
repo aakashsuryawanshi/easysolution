@@ -3,20 +3,19 @@ package com.apt.wii.web.rest;
 import com.apt.wii.domain.Subject;
 import com.apt.wii.repository.SubjectRepository;
 import com.apt.wii.web.rest.errors.BadRequestAlertException;
-
-import io.github.jhipster.web.util.HeaderUtil;
-import io.github.jhipster.web.util.ResponseUtil;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
+import tech.jhipster.web.util.HeaderUtil;
+import tech.jhipster.web.util.ResponseUtil;
 
 /**
  * REST controller for managing {@link com.apt.wii.domain.Subject}.
@@ -28,7 +27,7 @@ public class SubjectResource {
 
     private final Logger log = LoggerFactory.getLogger(SubjectResource.class);
 
-    private static final String ENTITY_NAME = "wiiSubject";
+    private static final String ENTITY_NAME = "subject";
 
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
@@ -53,30 +52,92 @@ public class SubjectResource {
             throw new BadRequestAlertException("A new subject cannot already have an ID", ENTITY_NAME, "idexists");
         }
         Subject result = subjectRepository.save(subject);
-        return ResponseEntity.created(new URI("/api/subjects/" + result.getId()))
+        return ResponseEntity
+            .created(new URI("/api/subjects/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
 
     /**
-     * {@code PUT  /subjects} : Updates an existing subject.
+     * {@code PUT  /subjects/:id} : Updates an existing subject.
      *
+     * @param id the id of the subject to save.
      * @param subject the subject to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated subject,
      * or with status {@code 400 (Bad Request)} if the subject is not valid,
      * or with status {@code 500 (Internal Server Error)} if the subject couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/subjects")
-    public ResponseEntity<Subject> updateSubject(@RequestBody Subject subject) throws URISyntaxException {
-        log.debug("REST request to update Subject : {}", subject);
+    @PutMapping("/subjects/{id}")
+    public ResponseEntity<Subject> updateSubject(@PathVariable(value = "id", required = false) final Long id, @RequestBody Subject subject)
+        throws URISyntaxException {
+        log.debug("REST request to update Subject : {}, {}", id, subject);
         if (subject.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
+        if (!Objects.equals(id, subject.getId())) {
+            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        }
+
+        if (!subjectRepository.existsById(id)) {
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
         Subject result = subjectRepository.save(subject);
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, subject.getId().toString()))
             .body(result);
+    }
+
+    /**
+     * {@code PATCH  /subjects/:id} : Partial updates given fields of an existing subject, field will ignore if it is null
+     *
+     * @param id the id of the subject to save.
+     * @param subject the subject to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated subject,
+     * or with status {@code 400 (Bad Request)} if the subject is not valid,
+     * or with status {@code 404 (Not Found)} if the subject is not found,
+     * or with status {@code 500 (Internal Server Error)} if the subject couldn't be updated.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PatchMapping(value = "/subjects/{id}", consumes = "application/merge-patch+json")
+    public ResponseEntity<Subject> partialUpdateSubject(
+        @PathVariable(value = "id", required = false) final Long id,
+        @RequestBody Subject subject
+    ) throws URISyntaxException {
+        log.debug("REST request to partial update Subject partially : {}, {}", id, subject);
+        if (subject.getId() == null) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        }
+        if (!Objects.equals(id, subject.getId())) {
+            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        }
+
+        if (!subjectRepository.existsById(id)) {
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+        }
+
+        Optional<Subject> result = subjectRepository
+            .findById(subject.getId())
+            .map(
+                existingSubject -> {
+                    if (subject.getName() != null) {
+                        existingSubject.setName(subject.getName());
+                    }
+                    if (subject.getDescription() != null) {
+                        existingSubject.setDescription(subject.getDescription());
+                    }
+
+                    return existingSubject;
+                }
+            )
+            .map(subjectRepository::save);
+
+        return ResponseUtil.wrapOrNotFound(
+            result,
+            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, subject.getId().toString())
+        );
     }
 
     /**
@@ -113,6 +174,9 @@ public class SubjectResource {
     public ResponseEntity<Void> deleteSubject(@PathVariable Long id) {
         log.debug("REST request to delete Subject : {}", id);
         subjectRepository.deleteById(id);
-        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString())).build();
+        return ResponseEntity
+            .noContent()
+            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
+            .build();
     }
 }

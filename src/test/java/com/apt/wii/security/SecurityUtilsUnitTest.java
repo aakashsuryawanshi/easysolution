@@ -1,29 +1,32 @@
 package com.apt.wii.security;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.oidc.OidcIdToken;
-import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-
-import java.time.Instant;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames.ID_TOKEN;
 
 /**
  * Test class for the {@link SecurityUtils} utility class.
  */
-public class SecurityUtilsUnitTest {
+class SecurityUtilsUnitTest {
+
+    @BeforeEach
+    @AfterEach
+    void cleanup() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
-    public void testGetCurrentUserLogin() {
+    void testGetCurrentUserLogin() {
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(new UsernamePasswordAuthenticationToken("admin", "admin"));
         SecurityContextHolder.setContext(securityContext);
@@ -32,28 +35,16 @@ public class SecurityUtilsUnitTest {
     }
 
     @Test
-    public void testGetCurrentUserLoginForOAuth2() {
+    void testgetCurrentUserJWT() {
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("groups", "ROLE_USER");
-        claims.put("sub", 123);
-        claims.put("preferred_username", "admin");
-        OidcIdToken idToken = new OidcIdToken(ID_TOKEN, Instant.now(),
-            Instant.now().plusSeconds(60), claims);
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.USER));
-        OidcUser user = new DefaultOidcUser(authorities, idToken);
-        OAuth2AuthenticationToken bla = new OAuth2AuthenticationToken(user, authorities, "oidc");
-        securityContext.setAuthentication(bla);
+        securityContext.setAuthentication(new UsernamePasswordAuthenticationToken("admin", "token"));
         SecurityContextHolder.setContext(securityContext);
-
-        Optional<String> login = SecurityUtils.getCurrentUserLogin();
-
-        assertThat(login).contains("admin");
+        Optional<String> jwt = SecurityUtils.getCurrentUserJWT();
+        assertThat(jwt).contains("token");
     }
 
     @Test
-    public void testIsAuthenticated() {
+    void testIsAuthenticated() {
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(new UsernamePasswordAuthenticationToken("admin", "admin"));
         SecurityContextHolder.setContext(securityContext);
@@ -62,7 +53,7 @@ public class SecurityUtilsUnitTest {
     }
 
     @Test
-    public void testAnonymousIsNotAuthenticated() {
+    void testAnonymousIsNotAuthenticated() {
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.ANONYMOUS));
@@ -73,15 +64,14 @@ public class SecurityUtilsUnitTest {
     }
 
     @Test
-    public void testIsCurrentUserInRole() {
+    void testHasCurrentUserThisAuthority() {
         SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(AuthoritiesConstants.USER));
         securityContext.setAuthentication(new UsernamePasswordAuthenticationToken("user", "user", authorities));
         SecurityContextHolder.setContext(securityContext);
 
-        assertThat(SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.USER)).isTrue();
-        assertThat(SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.ADMIN)).isFalse();
+        assertThat(SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.USER)).isTrue();
+        assertThat(SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN)).isFalse();
     }
-
 }

@@ -23,12 +23,10 @@
     {
       "relationshipType": "many-to-one",
       "otherEntityName": "question",
-      "otherEntityRelationshipName": "content",
-      "relationshipName": "answers",
-      "otherEntityField": "id"
+      "otherEntityRelationshipName": "answers",
+      "relationshipName": "question"
     }
   ],
-  "changelogDate": "20210508155628",
   "entityTableName": "content",
   "dto": "no",
   "pagination": "no",
@@ -37,7 +35,6 @@
   "fluentMethods": true,
   "readOnly": false,
   "embedded": false,
-  "clientRootFolder": "wii",
   "applications": "*",
-  "microserviceName": "wii"
+  "changelogDate": "20210510162858"
 }

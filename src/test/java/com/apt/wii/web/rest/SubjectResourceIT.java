@@ -1,41 +1,45 @@
 package com.apt.wii.web.rest;
 
-import com.apt.wii.WiiApp;
-import com.apt.wii.config.TestSecurityConfiguration;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import com.apt.wii.IntegrationTest;
 import com.apt.wii.domain.Subject;
 import com.apt.wii.repository.SubjectRepository;
-
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import javax.persistence.EntityManager;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Integration tests for the {@link SubjectResource} REST controller.
  */
-@SpringBootTest(classes = { WiiApp.class, TestSecurityConfiguration.class })
+@IntegrationTest
 @AutoConfigureMockMvc
 @WithMockUser
-public class SubjectResourceIT {
+class SubjectResourceIT {
 
     private static final String DEFAULT_NAME = "AAAAAAAAAA";
     private static final String UPDATED_NAME = "BBBBBBBBBB";
 
     private static final String DEFAULT_DESCRIPTION = "AAAAAAAAAA";
     private static final String UPDATED_DESCRIPTION = "BBBBBBBBBB";
+
+    private static final String ENTITY_API_URL = "/api/subjects";
+    private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
+
+    private static Random random = new Random();
+    private static AtomicLong count = new AtomicLong(random.nextInt() + (2 * Integer.MAX_VALUE));
 
     @Autowired
     private SubjectRepository subjectRepository;
@@ -55,11 +59,10 @@ public class SubjectResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Subject createEntity(EntityManager em) {
-        Subject subject = new Subject()
-            .name(DEFAULT_NAME)
-            .description(DEFAULT_DESCRIPTION);
+        Subject subject = new Subject().name(DEFAULT_NAME).description(DEFAULT_DESCRIPTION);
         return subject;
     }
+
     /**
      * Create an updated entity for this test.
      *
@@ -67,9 +70,7 @@ public class SubjectResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Subject createUpdatedEntity(EntityManager em) {
-        Subject subject = new Subject()
-            .name(UPDATED_NAME)
-            .description(UPDATED_DESCRIPTION);
+        Subject subject = new Subject().name(UPDATED_NAME).description(UPDATED_DESCRIPTION);
         return subject;
     }
 
@@ -80,12 +81,11 @@ public class SubjectResourceIT {
 
     @Test
     @Transactional
-    public void createSubject() throws Exception {
+    void createSubject() throws Exception {
         int databaseSizeBeforeCreate = subjectRepository.findAll().size();
         // Create the Subject
-        restSubjectMockMvc.perform(post("/api/subjects").with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(subject)))
+        restSubjectMockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(subject)))
             .andExpect(status().isCreated());
 
         // Validate the Subject in the database
@@ -98,16 +98,15 @@ public class SubjectResourceIT {
 
     @Test
     @Transactional
-    public void createSubjectWithExistingId() throws Exception {
-        int databaseSizeBeforeCreate = subjectRepository.findAll().size();
-
+    void createSubjectWithExistingId() throws Exception {
         // Create the Subject with an existing ID
         subject.setId(1L);
 
+        int databaseSizeBeforeCreate = subjectRepository.findAll().size();
+
         // An entity with an existing ID cannot be created, so this API call must fail
-        restSubjectMockMvc.perform(post("/api/subjects").with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(subject)))
+        restSubjectMockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(subject)))
             .andExpect(status().isBadRequest());
 
         // Validate the Subject in the database
@@ -115,47 +114,48 @@ public class SubjectResourceIT {
         assertThat(subjectList).hasSize(databaseSizeBeforeCreate);
     }
 
-
     @Test
     @Transactional
-    public void getAllSubjects() throws Exception {
+    void getAllSubjects() throws Exception {
         // Initialize the database
         subjectRepository.saveAndFlush(subject);
 
         // Get all the subjectList
-        restSubjectMockMvc.perform(get("/api/subjects?sort=id,desc"))
+        restSubjectMockMvc
+            .perform(get(ENTITY_API_URL + "?sort=id,desc"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(subject.getId().intValue())))
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
             .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION)));
     }
-    
+
     @Test
     @Transactional
-    public void getSubject() throws Exception {
+    void getSubject() throws Exception {
         // Initialize the database
         subjectRepository.saveAndFlush(subject);
 
         // Get the subject
-        restSubjectMockMvc.perform(get("/api/subjects/{id}", subject.getId()))
+        restSubjectMockMvc
+            .perform(get(ENTITY_API_URL_ID, subject.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.id").value(subject.getId().intValue()))
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
             .andExpect(jsonPath("$.description").value(DEFAULT_DESCRIPTION));
     }
+
     @Test
     @Transactional
-    public void getNonExistingSubject() throws Exception {
+    void getNonExistingSubject() throws Exception {
         // Get the subject
-        restSubjectMockMvc.perform(get("/api/subjects/{id}", Long.MAX_VALUE))
-            .andExpect(status().isNotFound());
+        restSubjectMockMvc.perform(get(ENTITY_API_URL_ID, Long.MAX_VALUE)).andExpect(status().isNotFound());
     }
 
     @Test
     @Transactional
-    public void updateSubject() throws Exception {
+    void putNewSubject() throws Exception {
         // Initialize the database
         subjectRepository.saveAndFlush(subject);
 
@@ -165,13 +165,14 @@ public class SubjectResourceIT {
         Subject updatedSubject = subjectRepository.findById(subject.getId()).get();
         // Disconnect from session so that the updates on updatedSubject are not directly saved in db
         em.detach(updatedSubject);
-        updatedSubject
-            .name(UPDATED_NAME)
-            .description(UPDATED_DESCRIPTION);
+        updatedSubject.name(UPDATED_NAME).description(UPDATED_DESCRIPTION);
 
-        restSubjectMockMvc.perform(put("/api/subjects").with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(updatedSubject)))
+        restSubjectMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, updatedSubject.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(updatedSubject))
+            )
             .andExpect(status().isOk());
 
         // Validate the Subject in the database
@@ -184,13 +185,17 @@ public class SubjectResourceIT {
 
     @Test
     @Transactional
-    public void updateNonExistingSubject() throws Exception {
+    void putNonExistingSubject() throws Exception {
         int databaseSizeBeforeUpdate = subjectRepository.findAll().size();
+        subject.setId(count.incrementAndGet());
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
-        restSubjectMockMvc.perform(put("/api/subjects").with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(TestUtil.convertObjectToJsonBytes(subject)))
+        restSubjectMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, subject.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(subject))
+            )
             .andExpect(status().isBadRequest());
 
         // Validate the Subject in the database
@@ -200,15 +205,167 @@ public class SubjectResourceIT {
 
     @Test
     @Transactional
-    public void deleteSubject() throws Exception {
+    void putWithIdMismatchSubject() throws Exception {
+        int databaseSizeBeforeUpdate = subjectRepository.findAll().size();
+        subject.setId(count.incrementAndGet());
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restSubjectMockMvc
+            .perform(
+                put(ENTITY_API_URL_ID, count.incrementAndGet())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtil.convertObjectToJsonBytes(subject))
+            )
+            .andExpect(status().isBadRequest());
+
+        // Validate the Subject in the database
+        List<Subject> subjectList = subjectRepository.findAll();
+        assertThat(subjectList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void putWithMissingIdPathParamSubject() throws Exception {
+        int databaseSizeBeforeUpdate = subjectRepository.findAll().size();
+        subject.setId(count.incrementAndGet());
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restSubjectMockMvc
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(subject)))
+            .andExpect(status().isMethodNotAllowed());
+
+        // Validate the Subject in the database
+        List<Subject> subjectList = subjectRepository.findAll();
+        assertThat(subjectList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void partialUpdateSubjectWithPatch() throws Exception {
+        // Initialize the database
+        subjectRepository.saveAndFlush(subject);
+
+        int databaseSizeBeforeUpdate = subjectRepository.findAll().size();
+
+        // Update the subject using partial update
+        Subject partialUpdatedSubject = new Subject();
+        partialUpdatedSubject.setId(subject.getId());
+
+        partialUpdatedSubject.description(UPDATED_DESCRIPTION);
+
+        restSubjectMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, partialUpdatedSubject.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedSubject))
+            )
+            .andExpect(status().isOk());
+
+        // Validate the Subject in the database
+        List<Subject> subjectList = subjectRepository.findAll();
+        assertThat(subjectList).hasSize(databaseSizeBeforeUpdate);
+        Subject testSubject = subjectList.get(subjectList.size() - 1);
+        assertThat(testSubject.getName()).isEqualTo(DEFAULT_NAME);
+        assertThat(testSubject.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
+    }
+
+    @Test
+    @Transactional
+    void fullUpdateSubjectWithPatch() throws Exception {
+        // Initialize the database
+        subjectRepository.saveAndFlush(subject);
+
+        int databaseSizeBeforeUpdate = subjectRepository.findAll().size();
+
+        // Update the subject using partial update
+        Subject partialUpdatedSubject = new Subject();
+        partialUpdatedSubject.setId(subject.getId());
+
+        partialUpdatedSubject.name(UPDATED_NAME).description(UPDATED_DESCRIPTION);
+
+        restSubjectMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, partialUpdatedSubject.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(partialUpdatedSubject))
+            )
+            .andExpect(status().isOk());
+
+        // Validate the Subject in the database
+        List<Subject> subjectList = subjectRepository.findAll();
+        assertThat(subjectList).hasSize(databaseSizeBeforeUpdate);
+        Subject testSubject = subjectList.get(subjectList.size() - 1);
+        assertThat(testSubject.getName()).isEqualTo(UPDATED_NAME);
+        assertThat(testSubject.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
+    }
+
+    @Test
+    @Transactional
+    void patchNonExistingSubject() throws Exception {
+        int databaseSizeBeforeUpdate = subjectRepository.findAll().size();
+        subject.setId(count.incrementAndGet());
+
+        // If the entity doesn't have an ID, it will throw BadRequestAlertException
+        restSubjectMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, subject.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(subject))
+            )
+            .andExpect(status().isBadRequest());
+
+        // Validate the Subject in the database
+        List<Subject> subjectList = subjectRepository.findAll();
+        assertThat(subjectList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void patchWithIdMismatchSubject() throws Exception {
+        int databaseSizeBeforeUpdate = subjectRepository.findAll().size();
+        subject.setId(count.incrementAndGet());
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restSubjectMockMvc
+            .perform(
+                patch(ENTITY_API_URL_ID, count.incrementAndGet())
+                    .contentType("application/merge-patch+json")
+                    .content(TestUtil.convertObjectToJsonBytes(subject))
+            )
+            .andExpect(status().isBadRequest());
+
+        // Validate the Subject in the database
+        List<Subject> subjectList = subjectRepository.findAll();
+        assertThat(subjectList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void patchWithMissingIdPathParamSubject() throws Exception {
+        int databaseSizeBeforeUpdate = subjectRepository.findAll().size();
+        subject.setId(count.incrementAndGet());
+
+        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
+        restSubjectMockMvc
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(subject)))
+            .andExpect(status().isMethodNotAllowed());
+
+        // Validate the Subject in the database
+        List<Subject> subjectList = subjectRepository.findAll();
+        assertThat(subjectList).hasSize(databaseSizeBeforeUpdate);
+    }
+
+    @Test
+    @Transactional
+    void deleteSubject() throws Exception {
         // Initialize the database
         subjectRepository.saveAndFlush(subject);
 
         int databaseSizeBeforeDelete = subjectRepository.findAll().size();
 
         // Delete the subject
-        restSubjectMockMvc.perform(delete("/api/subjects/{id}", subject.getId()).with(csrf())
-            .accept(MediaType.APPLICATION_JSON))
+        restSubjectMockMvc
+            .perform(delete(ENTITY_API_URL_ID, subject.getId()).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
         // Validate the database contains one less item
