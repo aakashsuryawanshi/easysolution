@@ -1,6 +1,7 @@
 package com.apt.wii.service;
 
 import com.apt.wii.service.dto.QuestionDTO;
+import com.apt.wii.service.dto.SubjectDTO;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +39,14 @@ public interface QuestionService {
      * @return the entity.
      */
     Optional<QuestionDTO> findOne(Long id);
+
+    /**
+     * Get the "id" subject.
+     *
+     * @param id the id of the entity.
+     * @return the entity.
+     */
+    List<QuestionDTO> findBySubject(Long id);
 
     /**
      * Delete the "id" question.

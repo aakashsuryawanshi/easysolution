@@ -155,6 +155,19 @@ public class SemesterResource {
     }
 
     /**
+     * {@code GET  /semesters/:id} : get the "id" semester.
+     *
+     * @param id the id of the semesterDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the semesterDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/semesters/{id}/branch")
+    public List<SemesterDTO> getSemesterByBranch(@PathVariable Long id) {
+        log.debug("REST request to get Semester : {}", id);
+        List<SemesterDTO> semesterDTOs = semesterService.findByBranch(id);
+        return semesterDTOs;
+    }
+
+    /**
      * {@code DELETE  /semesters/:id} : delete the "id" semester.
      *
      * @param id the id of the semesterDTO to delete.

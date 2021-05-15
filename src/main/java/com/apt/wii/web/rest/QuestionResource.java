@@ -155,6 +155,19 @@ public class QuestionResource {
     }
 
     /**
+     * {@code GET  /questions/:id} : get the "id" question.
+     *
+     * @param id the id of the questionDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the questionDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/questions/{id}/subject")
+    public List<QuestionDTO> getQuestionBySubject(@PathVariable Long id) {
+        log.debug("REST request to get Question : {}", id);
+        List<QuestionDTO> questionDTOs = questionService.findBySubject(id);
+        return questionDTOs;
+    }
+
+    /**
      * {@code DELETE  /questions/:id} : delete the "id" question.
      *
      * @param id the id of the questionDTO to delete.

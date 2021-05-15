@@ -1,5 +1,6 @@
 package com.apt.wii.service;
 
+import com.apt.wii.service.dto.SemesterDTO;
 import com.apt.wii.service.dto.SubjectDTO;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,14 @@ public interface SubjectService {
      * @return the entity.
      */
     Optional<SubjectDTO> findOne(Long id);
+
+    /**
+     * Get the "id" semester.
+     *
+     * @param id the id of the entity.
+     * @return the entity.
+     */
+    List<SubjectDTO> findBySemester(Long id);
 
     /**
      * Delete the "id" subject.
