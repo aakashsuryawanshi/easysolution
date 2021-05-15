@@ -45,7 +45,7 @@ public class ContentResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new content, or with status {@code 400 (Bad Request)} if the content has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("/contents")
+    @PostMapping("/secure/contents")
     public ResponseEntity<Content> createContent(@RequestBody Content content) throws URISyntaxException {
         log.debug("REST request to save Content : {}", content);
         if (content.getId() != null) {
@@ -68,7 +68,7 @@ public class ContentResource {
      * or with status {@code 500 (Internal Server Error)} if the content couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/contents/{id}")
+    @PutMapping("/secure/contents/{id}")
     public ResponseEntity<Content> updateContent(@PathVariable(value = "id", required = false) final Long id, @RequestBody Content content)
         throws URISyntaxException {
         log.debug("REST request to update Content : {}, {}", id, content);
@@ -101,7 +101,7 @@ public class ContentResource {
      * or with status {@code 500 (Internal Server Error)} if the content couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/contents/{id}", consumes = "application/merge-patch+json")
+    @PatchMapping(value = "/secure/contents/{id}", consumes = "application/merge-patch+json")
     public ResponseEntity<Content> partialUpdateContent(
         @PathVariable(value = "id", required = false) final Long id,
         @RequestBody Content content
@@ -176,7 +176,7 @@ public class ContentResource {
      * @param id the id of the content to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/contents/{id}")
+    @DeleteMapping("/secure/contents/{id}")
     public ResponseEntity<Void> deleteContent(@PathVariable Long id) {
         log.debug("REST request to delete Content : {}", id);
         contentRepository.deleteById(id);

@@ -45,7 +45,7 @@ public class QuestionResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new question, or with status {@code 400 (Bad Request)} if the question has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("/questions")
+    @PostMapping("/secure/questions")
     public ResponseEntity<Question> createQuestion(@RequestBody Question question) throws URISyntaxException {
         log.debug("REST request to save Question : {}", question);
         if (question.getId() != null) {
@@ -68,7 +68,7 @@ public class QuestionResource {
      * or with status {@code 500 (Internal Server Error)} if the question couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/questions/{id}")
+    @PutMapping("/secure/questions/{id}")
     public ResponseEntity<Question> updateQuestion(
         @PathVariable(value = "id", required = false) final Long id,
         @RequestBody Question question
@@ -103,7 +103,7 @@ public class QuestionResource {
      * or with status {@code 500 (Internal Server Error)} if the question couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/questions/{id}", consumes = "application/merge-patch+json")
+    @PatchMapping(value = "/secure/questions/{id}", consumes = "application/merge-patch+json")
     public ResponseEntity<Question> partialUpdateQuestion(
         @PathVariable(value = "id", required = false) final Long id,
         @RequestBody Question question
@@ -175,7 +175,7 @@ public class QuestionResource {
      * @param id the id of the question to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/questions/{id}")
+    @DeleteMapping("/secure/questions/{id}")
     public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
         log.debug("REST request to delete Question : {}", id);
         questionRepository.deleteById(id);

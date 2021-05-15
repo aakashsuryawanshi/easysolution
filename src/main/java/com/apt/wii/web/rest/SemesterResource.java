@@ -45,7 +45,7 @@ public class SemesterResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new semester, or with status {@code 400 (Bad Request)} if the semester has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("/semesters")
+    @PostMapping("/secure/semesters")
     public ResponseEntity<Semester> createSemester(@RequestBody Semester semester) throws URISyntaxException {
         log.debug("REST request to save Semester : {}", semester);
         if (semester.getId() != null) {
@@ -68,7 +68,7 @@ public class SemesterResource {
      * or with status {@code 500 (Internal Server Error)} if the semester couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/semesters/{id}")
+    @PutMapping("/secure/semesters/{id}")
     public ResponseEntity<Semester> updateSemester(
         @PathVariable(value = "id", required = false) final Long id,
         @RequestBody Semester semester
@@ -103,7 +103,7 @@ public class SemesterResource {
      * or with status {@code 500 (Internal Server Error)} if the semester couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/semesters/{id}", consumes = "application/merge-patch+json")
+    @PatchMapping(value = "/secure/semesters/{id}", consumes = "application/merge-patch+json")
     public ResponseEntity<Semester> partialUpdateSemester(
         @PathVariable(value = "id", required = false) final Long id,
         @RequestBody Semester semester
@@ -172,7 +172,7 @@ public class SemesterResource {
      * @param id the id of the semester to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/semesters/{id}")
+    @DeleteMapping("/secure/semesters/{id}")
     public ResponseEntity<Void> deleteSemester(@PathVariable Long id) {
         log.debug("REST request to delete Semester : {}", id);
         semesterRepository.deleteById(id);

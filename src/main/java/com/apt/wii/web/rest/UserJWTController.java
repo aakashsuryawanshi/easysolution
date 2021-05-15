@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * Controller to authenticate users.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/secure")
 public class UserJWTController {
 
     private final TokenProvider tokenProvider;

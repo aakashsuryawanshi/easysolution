@@ -45,7 +45,7 @@ public class BranchResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new branch, or with status {@code 400 (Bad Request)} if the branch has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("/branches")
+    @PostMapping("/secure/branches")
     public ResponseEntity<Branch> createBranch(@RequestBody Branch branch) throws URISyntaxException {
         log.debug("REST request to save Branch : {}", branch);
         if (branch.getId() != null) {
@@ -68,7 +68,7 @@ public class BranchResource {
      * or with status {@code 500 (Internal Server Error)} if the branch couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/branches/{id}")
+    @PutMapping("/secure/branches/{id}")
     public ResponseEntity<Branch> updateBranch(@PathVariable(value = "id", required = false) final Long id, @RequestBody Branch branch)
         throws URISyntaxException {
         log.debug("REST request to update Branch : {}, {}", id, branch);
@@ -101,7 +101,7 @@ public class BranchResource {
      * or with status {@code 500 (Internal Server Error)} if the branch couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "/branches/{id}", consumes = "application/merge-patch+json")
+    @PatchMapping(value = "/secure/branches/{id}", consumes = "application/merge-patch+json")
     public ResponseEntity<Branch> partialUpdateBranch(
         @PathVariable(value = "id", required = false) final Long id,
         @RequestBody Branch branch
@@ -170,7 +170,7 @@ public class BranchResource {
      * @param id the id of the branch to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/branches/{id}")
+    @DeleteMapping("/secure/branches/{id}")
     public ResponseEntity<Void> deleteBranch(@PathVariable Long id) {
         log.debug("REST request to delete Branch : {}", id);
         branchRepository.deleteById(id);
