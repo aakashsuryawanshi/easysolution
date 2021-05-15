@@ -21,7 +21,7 @@ import tech.jhipster.web.util.ResponseUtil;
  * REST controller for managing {@link com.apt.wii.domain.Subject}.
  */
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api")
 @Transactional
 public class SubjectResource {
 
@@ -45,7 +45,7 @@ public class SubjectResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new subject, or with status {@code 400 (Bad Request)} if the subject has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("api/subjects")
+    @PostMapping("/secure/subjects")
     public ResponseEntity<Subject> createSubject(@RequestBody Subject subject) throws URISyntaxException {
         log.debug("REST request to save Subject : {}", subject);
         if (subject.getId() != null) {
@@ -68,7 +68,7 @@ public class SubjectResource {
      * or with status {@code 500 (Internal Server Error)} if the subject couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("api/subjects/{id}")
+    @PutMapping("/secure/subjects/{id}")
     public ResponseEntity<Subject> updateSubject(@PathVariable(value = "id", required = false) final Long id, @RequestBody Subject subject)
         throws URISyntaxException {
         log.debug("REST request to update Subject : {}, {}", id, subject);
@@ -101,7 +101,7 @@ public class SubjectResource {
      * or with status {@code 500 (Internal Server Error)} if the subject couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "api/subjects/{id}", consumes = "application/merge-patch+json")
+    @PatchMapping(value = "/secure/subjects/{id}", consumes = "application/merge-patch+json")
     public ResponseEntity<Subject> partialUpdateSubject(
         @PathVariable(value = "id", required = false) final Long id,
         @RequestBody Subject subject
@@ -170,7 +170,7 @@ public class SubjectResource {
      * @param id the id of the subject to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("api/subjects/{id}")
+    @DeleteMapping("/secure/subjects/{id}")
     public ResponseEntity<Void> deleteSubject(@PathVariable Long id) {
         log.debug("REST request to delete Subject : {}", id);
         subjectRepository.deleteById(id);

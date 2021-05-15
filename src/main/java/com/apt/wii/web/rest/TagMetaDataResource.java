@@ -21,7 +21,7 @@ import tech.jhipster.web.util.ResponseUtil;
  * REST controller for managing {@link com.apt.wii.domain.TagMetaData}.
  */
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api")
 @Transactional
 public class TagMetaDataResource {
 
@@ -45,7 +45,7 @@ public class TagMetaDataResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new tagMetaData, or with status {@code 400 (Bad Request)} if the tagMetaData has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("api/tag-meta-data")
+    @PostMapping("/secure/tag-meta-data")
     public ResponseEntity<TagMetaData> createTagMetaData(@RequestBody TagMetaData tagMetaData) throws URISyntaxException {
         log.debug("REST request to save TagMetaData : {}", tagMetaData);
         if (tagMetaData.getId() != null) {
@@ -68,7 +68,7 @@ public class TagMetaDataResource {
      * or with status {@code 500 (Internal Server Error)} if the tagMetaData couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("api/tag-meta-data/{id}")
+    @PutMapping("/secure/tag-meta-data/{id}")
     public ResponseEntity<TagMetaData> updateTagMetaData(
         @PathVariable(value = "id", required = false) final Long id,
         @RequestBody TagMetaData tagMetaData
@@ -103,7 +103,7 @@ public class TagMetaDataResource {
      * or with status {@code 500 (Internal Server Error)} if the tagMetaData couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "api/tag-meta-data/{id}", consumes = "application/merge-patch+json")
+    @PatchMapping(value = "/secure/tag-meta-data/{id}", consumes = "application/merge-patch+json")
     public ResponseEntity<TagMetaData> partialUpdateTagMetaData(
         @PathVariable(value = "id", required = false) final Long id,
         @RequestBody TagMetaData tagMetaData
@@ -172,7 +172,7 @@ public class TagMetaDataResource {
      * @param id the id of the tagMetaData to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("api/tag-meta-data/{id}")
+    @DeleteMapping("/secure/tag-meta-data/{id}")
     public ResponseEntity<Void> deleteTagMetaData(@PathVariable Long id) {
         log.debug("REST request to delete TagMetaData : {}", id);
         tagMetaDataRepository.deleteById(id);

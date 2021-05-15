@@ -21,7 +21,7 @@ import tech.jhipster.web.util.ResponseUtil;
  * REST controller for managing {@link com.apt.wii.domain.Domain}.
  */
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api")
 @Transactional
 public class DomainResource {
 
@@ -45,7 +45,7 @@ public class DomainResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new domain, or with status {@code 400 (Bad Request)} if the domain has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("api/domains")
+    @PostMapping("/secure/domains")
     public ResponseEntity<Domain> createDomain(@RequestBody Domain domain) throws URISyntaxException {
         log.debug("REST request to save Domain : {}", domain);
         if (domain.getId() != null) {
@@ -68,7 +68,7 @@ public class DomainResource {
      * or with status {@code 500 (Internal Server Error)} if the domain couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("api/domains/{id}")
+    @PutMapping("/secure/domains/{id}")
     public ResponseEntity<Domain> updateDomain(@PathVariable(value = "id", required = false) final Long id, @RequestBody Domain domain)
         throws URISyntaxException {
         log.debug("REST request to update Domain : {}, {}", id, domain);
@@ -101,7 +101,7 @@ public class DomainResource {
      * or with status {@code 500 (Internal Server Error)} if the domain couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PatchMapping(value = "api/domains/{id}", consumes = "application/merge-patch+json")
+    @PatchMapping(value = "/secure/domains/{id}", consumes = "application/merge-patch+json")
     public ResponseEntity<Domain> partialUpdateDomain(
         @PathVariable(value = "id", required = false) final Long id,
         @RequestBody Domain domain
@@ -170,7 +170,7 @@ public class DomainResource {
      * @param id the id of the domain to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/domains/{id}")
+    @DeleteMapping("/secure/domains/{id}")
     public ResponseEntity<Void> deleteDomain(@PathVariable Long id) {
         log.debug("REST request to delete Domain : {}", id);
         domainRepository.deleteById(id);
