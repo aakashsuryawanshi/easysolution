@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.apt.wii.IntegrationTest;
 import com.apt.wii.domain.Branch;
 import com.apt.wii.repository.BranchRepository;
+import com.apt.wii.service.dto.BranchDTO;
+import com.apt.wii.service.mapper.BranchMapper;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,6 +45,9 @@ class BranchResourceIT {
 
     @Autowired
     private BranchRepository branchRepository;
+
+    @Autowired
+    private BranchMapper branchMapper;
 
     @Autowired
     private EntityManager em;
@@ -84,8 +89,9 @@ class BranchResourceIT {
     void createBranch() throws Exception {
         int databaseSizeBeforeCreate = branchRepository.findAll().size();
         // Create the Branch
+        BranchDTO branchDTO = branchMapper.toDto(branch);
         restBranchMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(branch)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(branchDTO)))
             .andExpect(status().isCreated());
 
         // Validate the Branch in the database
@@ -101,12 +107,13 @@ class BranchResourceIT {
     void createBranchWithExistingId() throws Exception {
         // Create the Branch with an existing ID
         branch.setId(1L);
+        BranchDTO branchDTO = branchMapper.toDto(branch);
 
         int databaseSizeBeforeCreate = branchRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restBranchMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(branch)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(branchDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Branch in the database
@@ -166,12 +173,13 @@ class BranchResourceIT {
         // Disconnect from session so that the updates on updatedBranch are not directly saved in db
         em.detach(updatedBranch);
         updatedBranch.name(UPDATED_NAME).description(UPDATED_DESCRIPTION);
+        BranchDTO branchDTO = branchMapper.toDto(updatedBranch);
 
         restBranchMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedBranch.getId())
+                put(ENTITY_API_URL_ID, branchDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedBranch))
+                    .content(TestUtil.convertObjectToJsonBytes(branchDTO))
             )
             .andExpect(status().isOk());
 
@@ -189,12 +197,15 @@ class BranchResourceIT {
         int databaseSizeBeforeUpdate = branchRepository.findAll().size();
         branch.setId(count.incrementAndGet());
 
+        // Create the Branch
+        BranchDTO branchDTO = branchMapper.toDto(branch);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restBranchMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, branch.getId())
+                put(ENTITY_API_URL_ID, branchDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(branch))
+                    .content(TestUtil.convertObjectToJsonBytes(branchDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -209,12 +220,15 @@ class BranchResourceIT {
         int databaseSizeBeforeUpdate = branchRepository.findAll().size();
         branch.setId(count.incrementAndGet());
 
+        // Create the Branch
+        BranchDTO branchDTO = branchMapper.toDto(branch);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restBranchMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(branch))
+                    .content(TestUtil.convertObjectToJsonBytes(branchDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -229,9 +243,12 @@ class BranchResourceIT {
         int databaseSizeBeforeUpdate = branchRepository.findAll().size();
         branch.setId(count.incrementAndGet());
 
+        // Create the Branch
+        BranchDTO branchDTO = branchMapper.toDto(branch);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restBranchMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(branch)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(branchDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Branch in the database
@@ -305,12 +322,15 @@ class BranchResourceIT {
         int databaseSizeBeforeUpdate = branchRepository.findAll().size();
         branch.setId(count.incrementAndGet());
 
+        // Create the Branch
+        BranchDTO branchDTO = branchMapper.toDto(branch);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restBranchMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, branch.getId())
+                patch(ENTITY_API_URL_ID, branchDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(branch))
+                    .content(TestUtil.convertObjectToJsonBytes(branchDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -325,12 +345,15 @@ class BranchResourceIT {
         int databaseSizeBeforeUpdate = branchRepository.findAll().size();
         branch.setId(count.incrementAndGet());
 
+        // Create the Branch
+        BranchDTO branchDTO = branchMapper.toDto(branch);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restBranchMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(branch))
+                    .content(TestUtil.convertObjectToJsonBytes(branchDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -345,9 +368,14 @@ class BranchResourceIT {
         int databaseSizeBeforeUpdate = branchRepository.findAll().size();
         branch.setId(count.incrementAndGet());
 
+        // Create the Branch
+        BranchDTO branchDTO = branchMapper.toDto(branch);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restBranchMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(branch)))
+            .perform(
+                patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(branchDTO))
+            )
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Branch in the database

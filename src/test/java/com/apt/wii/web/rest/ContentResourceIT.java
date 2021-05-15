@@ -9,6 +9,8 @@ import com.apt.wii.IntegrationTest;
 import com.apt.wii.domain.Content;
 import com.apt.wii.domain.enumeration.ContentType;
 import com.apt.wii.repository.ContentRepository;
+import com.apt.wii.service.dto.ContentDTO;
+import com.apt.wii.service.mapper.ContentMapper;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -52,6 +54,9 @@ class ContentResourceIT {
     private ContentRepository contentRepository;
 
     @Autowired
+    private ContentMapper contentMapper;
+
+    @Autowired
     private EntityManager em;
 
     @Autowired
@@ -91,8 +96,9 @@ class ContentResourceIT {
     void createContent() throws Exception {
         int databaseSizeBeforeCreate = contentRepository.findAll().size();
         // Create the Content
+        ContentDTO contentDTO = contentMapper.toDto(content);
         restContentMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(content)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(contentDTO)))
             .andExpect(status().isCreated());
 
         // Validate the Content in the database
@@ -110,12 +116,13 @@ class ContentResourceIT {
     void createContentWithExistingId() throws Exception {
         // Create the Content with an existing ID
         content.setId(1L);
+        ContentDTO contentDTO = contentMapper.toDto(content);
 
         int databaseSizeBeforeCreate = contentRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restContentMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(content)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(contentDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Content in the database
@@ -179,12 +186,13 @@ class ContentResourceIT {
         // Disconnect from session so that the updates on updatedContent are not directly saved in db
         em.detach(updatedContent);
         updatedContent.type(UPDATED_TYPE).text(UPDATED_TEXT).filePath(UPDATED_FILE_PATH).seqNum(UPDATED_SEQ_NUM);
+        ContentDTO contentDTO = contentMapper.toDto(updatedContent);
 
         restContentMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedContent.getId())
+                put(ENTITY_API_URL_ID, contentDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedContent))
+                    .content(TestUtil.convertObjectToJsonBytes(contentDTO))
             )
             .andExpect(status().isOk());
 
@@ -204,12 +212,15 @@ class ContentResourceIT {
         int databaseSizeBeforeUpdate = contentRepository.findAll().size();
         content.setId(count.incrementAndGet());
 
+        // Create the Content
+        ContentDTO contentDTO = contentMapper.toDto(content);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restContentMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, content.getId())
+                put(ENTITY_API_URL_ID, contentDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(content))
+                    .content(TestUtil.convertObjectToJsonBytes(contentDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -224,12 +235,15 @@ class ContentResourceIT {
         int databaseSizeBeforeUpdate = contentRepository.findAll().size();
         content.setId(count.incrementAndGet());
 
+        // Create the Content
+        ContentDTO contentDTO = contentMapper.toDto(content);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restContentMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(content))
+                    .content(TestUtil.convertObjectToJsonBytes(contentDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -244,9 +258,12 @@ class ContentResourceIT {
         int databaseSizeBeforeUpdate = contentRepository.findAll().size();
         content.setId(count.incrementAndGet());
 
+        // Create the Content
+        ContentDTO contentDTO = contentMapper.toDto(content);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restContentMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(content)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(contentDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Content in the database
@@ -324,12 +341,15 @@ class ContentResourceIT {
         int databaseSizeBeforeUpdate = contentRepository.findAll().size();
         content.setId(count.incrementAndGet());
 
+        // Create the Content
+        ContentDTO contentDTO = contentMapper.toDto(content);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restContentMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, content.getId())
+                patch(ENTITY_API_URL_ID, contentDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(content))
+                    .content(TestUtil.convertObjectToJsonBytes(contentDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -344,12 +364,15 @@ class ContentResourceIT {
         int databaseSizeBeforeUpdate = contentRepository.findAll().size();
         content.setId(count.incrementAndGet());
 
+        // Create the Content
+        ContentDTO contentDTO = contentMapper.toDto(content);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restContentMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(content))
+                    .content(TestUtil.convertObjectToJsonBytes(contentDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -364,9 +387,14 @@ class ContentResourceIT {
         int databaseSizeBeforeUpdate = contentRepository.findAll().size();
         content.setId(count.incrementAndGet());
 
+        // Create the Content
+        ContentDTO contentDTO = contentMapper.toDto(content);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restContentMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(content)))
+            .perform(
+                patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(contentDTO))
+            )
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Content in the database

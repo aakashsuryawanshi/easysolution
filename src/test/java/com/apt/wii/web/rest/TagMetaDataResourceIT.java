@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.apt.wii.IntegrationTest;
 import com.apt.wii.domain.TagMetaData;
 import com.apt.wii.repository.TagMetaDataRepository;
+import com.apt.wii.service.dto.TagMetaDataDTO;
+import com.apt.wii.service.mapper.TagMetaDataMapper;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,6 +45,9 @@ class TagMetaDataResourceIT {
 
     @Autowired
     private TagMetaDataRepository tagMetaDataRepository;
+
+    @Autowired
+    private TagMetaDataMapper tagMetaDataMapper;
 
     @Autowired
     private EntityManager em;
@@ -84,8 +89,11 @@ class TagMetaDataResourceIT {
     void createTagMetaData() throws Exception {
         int databaseSizeBeforeCreate = tagMetaDataRepository.findAll().size();
         // Create the TagMetaData
+        TagMetaDataDTO tagMetaDataDTO = tagMetaDataMapper.toDto(tagMetaData);
         restTagMetaDataMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(tagMetaData)))
+            .perform(
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(tagMetaDataDTO))
+            )
             .andExpect(status().isCreated());
 
         // Validate the TagMetaData in the database
@@ -101,12 +109,15 @@ class TagMetaDataResourceIT {
     void createTagMetaDataWithExistingId() throws Exception {
         // Create the TagMetaData with an existing ID
         tagMetaData.setId(1L);
+        TagMetaDataDTO tagMetaDataDTO = tagMetaDataMapper.toDto(tagMetaData);
 
         int databaseSizeBeforeCreate = tagMetaDataRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restTagMetaDataMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(tagMetaData)))
+            .perform(
+                post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(tagMetaDataDTO))
+            )
             .andExpect(status().isBadRequest());
 
         // Validate the TagMetaData in the database
@@ -166,12 +177,13 @@ class TagMetaDataResourceIT {
         // Disconnect from session so that the updates on updatedTagMetaData are not directly saved in db
         em.detach(updatedTagMetaData);
         updatedTagMetaData.key(UPDATED_KEY).value(UPDATED_VALUE);
+        TagMetaDataDTO tagMetaDataDTO = tagMetaDataMapper.toDto(updatedTagMetaData);
 
         restTagMetaDataMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedTagMetaData.getId())
+                put(ENTITY_API_URL_ID, tagMetaDataDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedTagMetaData))
+                    .content(TestUtil.convertObjectToJsonBytes(tagMetaDataDTO))
             )
             .andExpect(status().isOk());
 
@@ -189,12 +201,15 @@ class TagMetaDataResourceIT {
         int databaseSizeBeforeUpdate = tagMetaDataRepository.findAll().size();
         tagMetaData.setId(count.incrementAndGet());
 
+        // Create the TagMetaData
+        TagMetaDataDTO tagMetaDataDTO = tagMetaDataMapper.toDto(tagMetaData);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restTagMetaDataMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, tagMetaData.getId())
+                put(ENTITY_API_URL_ID, tagMetaDataDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(tagMetaData))
+                    .content(TestUtil.convertObjectToJsonBytes(tagMetaDataDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -209,12 +224,15 @@ class TagMetaDataResourceIT {
         int databaseSizeBeforeUpdate = tagMetaDataRepository.findAll().size();
         tagMetaData.setId(count.incrementAndGet());
 
+        // Create the TagMetaData
+        TagMetaDataDTO tagMetaDataDTO = tagMetaDataMapper.toDto(tagMetaData);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restTagMetaDataMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(tagMetaData))
+                    .content(TestUtil.convertObjectToJsonBytes(tagMetaDataDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -229,9 +247,12 @@ class TagMetaDataResourceIT {
         int databaseSizeBeforeUpdate = tagMetaDataRepository.findAll().size();
         tagMetaData.setId(count.incrementAndGet());
 
+        // Create the TagMetaData
+        TagMetaDataDTO tagMetaDataDTO = tagMetaDataMapper.toDto(tagMetaData);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restTagMetaDataMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(tagMetaData)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(tagMetaDataDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the TagMetaData in the database
@@ -305,12 +326,15 @@ class TagMetaDataResourceIT {
         int databaseSizeBeforeUpdate = tagMetaDataRepository.findAll().size();
         tagMetaData.setId(count.incrementAndGet());
 
+        // Create the TagMetaData
+        TagMetaDataDTO tagMetaDataDTO = tagMetaDataMapper.toDto(tagMetaData);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restTagMetaDataMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, tagMetaData.getId())
+                patch(ENTITY_API_URL_ID, tagMetaDataDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(tagMetaData))
+                    .content(TestUtil.convertObjectToJsonBytes(tagMetaDataDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -325,12 +349,15 @@ class TagMetaDataResourceIT {
         int databaseSizeBeforeUpdate = tagMetaDataRepository.findAll().size();
         tagMetaData.setId(count.incrementAndGet());
 
+        // Create the TagMetaData
+        TagMetaDataDTO tagMetaDataDTO = tagMetaDataMapper.toDto(tagMetaData);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restTagMetaDataMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(tagMetaData))
+                    .content(TestUtil.convertObjectToJsonBytes(tagMetaDataDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -345,10 +372,13 @@ class TagMetaDataResourceIT {
         int databaseSizeBeforeUpdate = tagMetaDataRepository.findAll().size();
         tagMetaData.setId(count.incrementAndGet());
 
+        // Create the TagMetaData
+        TagMetaDataDTO tagMetaDataDTO = tagMetaDataMapper.toDto(tagMetaData);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restTagMetaDataMockMvc
             .perform(
-                patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(tagMetaData))
+                patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(tagMetaDataDTO))
             )
             .andExpect(status().isMethodNotAllowed());
 
