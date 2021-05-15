@@ -1,7 +1,6 @@
 package com.apt.wii.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModel;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,7 +9,6 @@ import javax.persistence.*;
 /**
  * Task entity.\n@author The JHipster team.
  */
-@ApiModel(description = "Task entity.\n@author The JHipster team.")
 @Entity
 @Table(name = "question")
 public class Question implements Serializable {

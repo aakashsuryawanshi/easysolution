@@ -1,7 +1,6 @@
 package com.apt.wii.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModel;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,7 +9,6 @@ import javax.persistence.*;
 /**
  * requirements\nER diagram\nclass diagram
  */
-@ApiModel(description = "requirements\nER diagram\nclass diagram")
 @Entity
 @Table(name = "domain")
 public class Domain implements Serializable {

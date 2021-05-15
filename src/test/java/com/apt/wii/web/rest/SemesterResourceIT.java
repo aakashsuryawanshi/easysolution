@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.apt.wii.IntegrationTest;
 import com.apt.wii.domain.Semester;
 import com.apt.wii.repository.SemesterRepository;
+import com.apt.wii.service.dto.SemesterDTO;
+import com.apt.wii.service.mapper.SemesterMapper;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,6 +45,9 @@ class SemesterResourceIT {
 
     @Autowired
     private SemesterRepository semesterRepository;
+
+    @Autowired
+    private SemesterMapper semesterMapper;
 
     @Autowired
     private EntityManager em;
@@ -84,8 +89,9 @@ class SemesterResourceIT {
     void createSemester() throws Exception {
         int databaseSizeBeforeCreate = semesterRepository.findAll().size();
         // Create the Semester
+        SemesterDTO semesterDTO = semesterMapper.toDto(semester);
         restSemesterMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(semester)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(semesterDTO)))
             .andExpect(status().isCreated());
 
         // Validate the Semester in the database
@@ -101,12 +107,13 @@ class SemesterResourceIT {
     void createSemesterWithExistingId() throws Exception {
         // Create the Semester with an existing ID
         semester.setId(1L);
+        SemesterDTO semesterDTO = semesterMapper.toDto(semester);
 
         int databaseSizeBeforeCreate = semesterRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restSemesterMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(semester)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(semesterDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Semester in the database
@@ -166,12 +173,13 @@ class SemesterResourceIT {
         // Disconnect from session so that the updates on updatedSemester are not directly saved in db
         em.detach(updatedSemester);
         updatedSemester.name(UPDATED_NAME).description(UPDATED_DESCRIPTION);
+        SemesterDTO semesterDTO = semesterMapper.toDto(updatedSemester);
 
         restSemesterMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedSemester.getId())
+                put(ENTITY_API_URL_ID, semesterDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedSemester))
+                    .content(TestUtil.convertObjectToJsonBytes(semesterDTO))
             )
             .andExpect(status().isOk());
 
@@ -189,12 +197,15 @@ class SemesterResourceIT {
         int databaseSizeBeforeUpdate = semesterRepository.findAll().size();
         semester.setId(count.incrementAndGet());
 
+        // Create the Semester
+        SemesterDTO semesterDTO = semesterMapper.toDto(semester);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restSemesterMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, semester.getId())
+                put(ENTITY_API_URL_ID, semesterDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(semester))
+                    .content(TestUtil.convertObjectToJsonBytes(semesterDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -209,12 +220,15 @@ class SemesterResourceIT {
         int databaseSizeBeforeUpdate = semesterRepository.findAll().size();
         semester.setId(count.incrementAndGet());
 
+        // Create the Semester
+        SemesterDTO semesterDTO = semesterMapper.toDto(semester);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSemesterMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(semester))
+                    .content(TestUtil.convertObjectToJsonBytes(semesterDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -229,9 +243,12 @@ class SemesterResourceIT {
         int databaseSizeBeforeUpdate = semesterRepository.findAll().size();
         semester.setId(count.incrementAndGet());
 
+        // Create the Semester
+        SemesterDTO semesterDTO = semesterMapper.toDto(semester);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSemesterMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(semester)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(semesterDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Semester in the database
@@ -305,12 +322,15 @@ class SemesterResourceIT {
         int databaseSizeBeforeUpdate = semesterRepository.findAll().size();
         semester.setId(count.incrementAndGet());
 
+        // Create the Semester
+        SemesterDTO semesterDTO = semesterMapper.toDto(semester);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restSemesterMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, semester.getId())
+                patch(ENTITY_API_URL_ID, semesterDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(semester))
+                    .content(TestUtil.convertObjectToJsonBytes(semesterDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -325,12 +345,15 @@ class SemesterResourceIT {
         int databaseSizeBeforeUpdate = semesterRepository.findAll().size();
         semester.setId(count.incrementAndGet());
 
+        // Create the Semester
+        SemesterDTO semesterDTO = semesterMapper.toDto(semester);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSemesterMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(semester))
+                    .content(TestUtil.convertObjectToJsonBytes(semesterDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -345,9 +368,14 @@ class SemesterResourceIT {
         int databaseSizeBeforeUpdate = semesterRepository.findAll().size();
         semester.setId(count.incrementAndGet());
 
+        // Create the Semester
+        SemesterDTO semesterDTO = semesterMapper.toDto(semester);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSemesterMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(semester)))
+            .perform(
+                patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(semesterDTO))
+            )
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Semester in the database

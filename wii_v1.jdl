@@ -62,4 +62,7 @@ relationship OneToMany {
     Question{answers} to Content
 }
 
+dto * with mapstruct
+service all with serviceImpl
+
 

@@ -1,14 +1,12 @@
 package com.apt.wii.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModel;
 import java.io.Serializable;
 import javax.persistence.*;
 
 /**
  * The Employee entity.
  */
-@ApiModel(description = "The Employee entity.")
 @Entity
 @Table(name = "tag_meta_data")
 public class TagMetaData implements Serializable {

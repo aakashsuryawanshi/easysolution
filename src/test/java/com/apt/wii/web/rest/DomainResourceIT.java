@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.apt.wii.IntegrationTest;
 import com.apt.wii.domain.Domain;
 import com.apt.wii.repository.DomainRepository;
+import com.apt.wii.service.dto.DomainDTO;
+import com.apt.wii.service.mapper.DomainMapper;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,6 +45,9 @@ class DomainResourceIT {
 
     @Autowired
     private DomainRepository domainRepository;
+
+    @Autowired
+    private DomainMapper domainMapper;
 
     @Autowired
     private EntityManager em;
@@ -84,8 +89,9 @@ class DomainResourceIT {
     void createDomain() throws Exception {
         int databaseSizeBeforeCreate = domainRepository.findAll().size();
         // Create the Domain
+        DomainDTO domainDTO = domainMapper.toDto(domain);
         restDomainMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(domain)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(domainDTO)))
             .andExpect(status().isCreated());
 
         // Validate the Domain in the database
@@ -101,12 +107,13 @@ class DomainResourceIT {
     void createDomainWithExistingId() throws Exception {
         // Create the Domain with an existing ID
         domain.setId(1L);
+        DomainDTO domainDTO = domainMapper.toDto(domain);
 
         int databaseSizeBeforeCreate = domainRepository.findAll().size();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restDomainMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(domain)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(domainDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Domain in the database
@@ -166,12 +173,13 @@ class DomainResourceIT {
         // Disconnect from session so that the updates on updatedDomain are not directly saved in db
         em.detach(updatedDomain);
         updatedDomain.name(UPDATED_NAME).description(UPDATED_DESCRIPTION);
+        DomainDTO domainDTO = domainMapper.toDto(updatedDomain);
 
         restDomainMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedDomain.getId())
+                put(ENTITY_API_URL_ID, domainDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(updatedDomain))
+                    .content(TestUtil.convertObjectToJsonBytes(domainDTO))
             )
             .andExpect(status().isOk());
 
@@ -189,12 +197,15 @@ class DomainResourceIT {
         int databaseSizeBeforeUpdate = domainRepository.findAll().size();
         domain.setId(count.incrementAndGet());
 
+        // Create the Domain
+        DomainDTO domainDTO = domainMapper.toDto(domain);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restDomainMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, domain.getId())
+                put(ENTITY_API_URL_ID, domainDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(domain))
+                    .content(TestUtil.convertObjectToJsonBytes(domainDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -209,12 +220,15 @@ class DomainResourceIT {
         int databaseSizeBeforeUpdate = domainRepository.findAll().size();
         domain.setId(count.incrementAndGet());
 
+        // Create the Domain
+        DomainDTO domainDTO = domainMapper.toDto(domain);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restDomainMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(TestUtil.convertObjectToJsonBytes(domain))
+                    .content(TestUtil.convertObjectToJsonBytes(domainDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -229,9 +243,12 @@ class DomainResourceIT {
         int databaseSizeBeforeUpdate = domainRepository.findAll().size();
         domain.setId(count.incrementAndGet());
 
+        // Create the Domain
+        DomainDTO domainDTO = domainMapper.toDto(domain);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restDomainMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(domain)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(domainDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Domain in the database
@@ -305,12 +322,15 @@ class DomainResourceIT {
         int databaseSizeBeforeUpdate = domainRepository.findAll().size();
         domain.setId(count.incrementAndGet());
 
+        // Create the Domain
+        DomainDTO domainDTO = domainMapper.toDto(domain);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restDomainMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, domain.getId())
+                patch(ENTITY_API_URL_ID, domainDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(domain))
+                    .content(TestUtil.convertObjectToJsonBytes(domainDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -325,12 +345,15 @@ class DomainResourceIT {
         int databaseSizeBeforeUpdate = domainRepository.findAll().size();
         domain.setId(count.incrementAndGet());
 
+        // Create the Domain
+        DomainDTO domainDTO = domainMapper.toDto(domain);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restDomainMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, count.incrementAndGet())
                     .contentType("application/merge-patch+json")
-                    .content(TestUtil.convertObjectToJsonBytes(domain))
+                    .content(TestUtil.convertObjectToJsonBytes(domainDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -345,9 +368,14 @@ class DomainResourceIT {
         int databaseSizeBeforeUpdate = domainRepository.findAll().size();
         domain.setId(count.incrementAndGet());
 
+        // Create the Domain
+        DomainDTO domainDTO = domainMapper.toDto(domain);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restDomainMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(domain)))
+            .perform(
+                patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(TestUtil.convertObjectToJsonBytes(domainDTO))
+            )
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Domain in the database
