@@ -155,6 +155,19 @@ public class SubjectResource {
     }
 
     /**
+     * {@code GET  /subjects/:id} : get the "id" subject.
+     *
+     * @param id the id of the subjectDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the subjectDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/subjects/{id}/semester")
+    public List<SubjectDTO> getSubjectBySemester(@PathVariable Long id) {
+        log.debug("REST request to get Subject : {}", id);
+        List<SubjectDTO> subjectDTOs = subjectService.findBySemester(id);
+        return subjectDTOs;
+    }
+
+    /**
      * {@code DELETE  /subjects/:id} : delete the "id" subject.
      *
      * @param id the id of the subjectDTO to delete.

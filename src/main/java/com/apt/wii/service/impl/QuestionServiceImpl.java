@@ -3,8 +3,13 @@ package com.apt.wii.service.impl;
 import com.apt.wii.domain.Question;
 import com.apt.wii.repository.QuestionRepository;
 import com.apt.wii.service.QuestionService;
+import com.apt.wii.service.SemesterService;
+import com.apt.wii.service.SubjectService;
+import com.apt.wii.service.dto.BranchDTO;
 import com.apt.wii.service.dto.QuestionDTO;
+import com.apt.wii.service.dto.SubjectDTO;
 import com.apt.wii.service.mapper.QuestionMapper;
+import com.apt.wii.service.mapper.SubjectMapper;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -27,9 +32,20 @@ public class QuestionServiceImpl implements QuestionService {
 
     private final QuestionMapper questionMapper;
 
-    public QuestionServiceImpl(QuestionRepository questionRepository, QuestionMapper questionMapper) {
+    private final SubjectMapper subjectMapper;
+
+    private final SubjectService subjectService;
+
+    public QuestionServiceImpl(
+        SubjectService subjectService,
+        QuestionRepository questionRepository,
+        QuestionMapper questionMapper,
+        SubjectMapper subjectMapper
+    ) {
         this.questionRepository = questionRepository;
         this.questionMapper = questionMapper;
+        this.subjectService = subjectService;
+        this.subjectMapper = subjectMapper;
     }
 
     @Override
@@ -74,5 +90,20 @@ public class QuestionServiceImpl implements QuestionService {
     public void delete(Long id) {
         log.debug("Request to delete Question : {}", id);
         questionRepository.deleteById(id);
+    }
+
+    @Override
+    public List<QuestionDTO> findBySubject(Long subjectId) {
+        log.debug("Request to get Semester by branch id: {}", subjectId);
+        Optional<SubjectDTO> b = subjectService.findOne(subjectId);
+        if (b.isPresent()) {
+            return questionRepository
+                .findBySubject(subjectMapper.toEntity(b.get()))
+                .stream()
+                .map(questionMapper::toDto)
+                .collect(Collectors.toCollection(LinkedList::new));
+        }
+        log.error("Invalid branch ID: {}", subjectId);
+        return null;
     }
 }

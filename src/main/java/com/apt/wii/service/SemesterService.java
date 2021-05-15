@@ -40,6 +40,14 @@ public interface SemesterService {
     Optional<SemesterDTO> findOne(Long id);
 
     /**
+     * Get the "id" semester.
+     *
+     * @param id the id of the entity.
+     * @return the entity.
+     */
+    List<SemesterDTO> findByBranch(Long id);
+
+    /**
      * Delete the "id" semester.
      *
      * @param id the id of the entity.

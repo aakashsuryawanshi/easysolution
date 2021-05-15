@@ -2,8 +2,13 @@ package com.apt.wii.service.impl;
 
 import com.apt.wii.domain.Subject;
 import com.apt.wii.repository.SubjectRepository;
+import com.apt.wii.service.BranchService;
+import com.apt.wii.service.SemesterService;
 import com.apt.wii.service.SubjectService;
+import com.apt.wii.service.dto.BranchDTO;
+import com.apt.wii.service.dto.SemesterDTO;
 import com.apt.wii.service.dto.SubjectDTO;
+import com.apt.wii.service.mapper.SemesterMapper;
 import com.apt.wii.service.mapper.SubjectMapper;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,9 +32,20 @@ public class SubjectServiceImpl implements SubjectService {
 
     private final SubjectMapper subjectMapper;
 
-    public SubjectServiceImpl(SubjectRepository subjectRepository, SubjectMapper subjectMapper) {
+    private final SemesterMapper semesterMapper;
+
+    private final SemesterService semesterService;
+
+    public SubjectServiceImpl(
+        SemesterService semesterService,
+        SemesterMapper semesterMapper,
+        SubjectRepository subjectRepository,
+        SubjectMapper subjectMapper
+    ) {
         this.subjectRepository = subjectRepository;
         this.subjectMapper = subjectMapper;
+        this.semesterService = semesterService;
+        this.semesterMapper = semesterMapper;
     }
 
     @Override
@@ -74,5 +90,20 @@ public class SubjectServiceImpl implements SubjectService {
     public void delete(Long id) {
         log.debug("Request to delete Subject : {}", id);
         subjectRepository.deleteById(id);
+    }
+
+    @Override
+    public List<SubjectDTO> findBySemester(Long semesterId) {
+        log.debug("Request to get Semester by branch id: {}", semesterId);
+        Optional<SemesterDTO> b = semesterService.findOne(semesterId);
+        if (b.isPresent()) {
+            return subjectRepository
+                .findBySemester(semesterMapper.toEntity(b.get()))
+                .stream()
+                .map(subjectMapper::toDto)
+                .collect(Collectors.toCollection(LinkedList::new));
+        }
+        log.error("Invalid branch ID: {}", semesterId);
+        return null;
     }
 }
