@@ -15,5 +15,5 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface ContentRepository extends PagingAndSortingRepository<Content, Long> {
-    List<Content> findByQuestion(Question question, Pageable paging);
+    List<Content> findByQuestion(Question question);
 }

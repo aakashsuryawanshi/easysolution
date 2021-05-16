@@ -161,13 +161,9 @@ public class ContentResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the contentDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/question/{id}/contents")
-    public List<ContentDTO> getContentByQuestion(
-        @PathVariable Long id,
-        @RequestParam(defaultValue = "0") Integer pageNo,
-        @RequestParam(defaultValue = "10") Integer pageSize
-    ) {
+    public List<ContentDTO> getContentByQuestion(@PathVariable Long id) {
         log.debug("REST request to get Content : {}", id);
-        List<ContentDTO> contentDTO = contentService.findByQuestion(id, pageNo, pageSize);
+        List<ContentDTO> contentDTO = contentService.findByQuestion(id);
         return contentDTO;
     }
 

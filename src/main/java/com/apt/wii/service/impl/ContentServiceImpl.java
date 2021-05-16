@@ -104,13 +104,13 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<ContentDTO> findByQuestion(Long id, int page, int size) {
+    public List<ContentDTO> findByQuestion(Long id) {
         log.debug("Request to get content by question id: {}", id);
         Optional<QuestionDTO> b = questionService.findOne(id);
-        Pageable paging = PageRequest.of(page, size);
+
         if (b.isPresent()) {
             return contentRepository
-                .findByQuestion(questionMapper.toEntity(b.get()), paging)
+                .findByQuestion(questionMapper.toEntity(b.get()))
                 .stream()
                 .map(contentMapper::toDto)
                 .collect(Collectors.toCollection(LinkedList::new));

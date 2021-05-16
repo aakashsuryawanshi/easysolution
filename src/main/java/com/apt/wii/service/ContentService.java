@@ -46,7 +46,7 @@ public interface ContentService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    List<ContentDTO> findByQuestion(Long id, int page, int size);
+    List<ContentDTO> findByQuestion(Long id);
 
     /**
      * Delete the "id" content.
