@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +78,16 @@ public class SubjectServiceImpl implements SubjectService {
     @Transactional(readOnly = true)
     public List<SubjectDTO> findAll() {
         log.debug("Request to get all Subjects");
-        return subjectRepository.findAll().stream().map(subjectMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<SubjectDTO> result = new LinkedList<SubjectDTO>();
+        subjectRepository
+            .findAll()
+            .forEach(
+                i -> {
+                    result.add(subjectMapper.toDto(i));
+                }
+            );
+        return result;
+        //return subjectRepository.findAll().stream().map(subjectMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
     }
 
     @Override
@@ -93,12 +104,13 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public List<SubjectDTO> findBySemester(Long semesterId) {
+    public List<SubjectDTO> findBySemester(Long semesterId, int page, int size) {
         log.debug("Request to get Semester by branch id: {}", semesterId);
         Optional<SemesterDTO> b = semesterService.findOne(semesterId);
+        Pageable paging = PageRequest.of(page, size);
         if (b.isPresent()) {
             return subjectRepository
-                .findBySemester(semesterMapper.toEntity(b.get()))
+                .findBySemester(semesterMapper.toEntity(b.get()), paging)
                 .stream()
                 .map(subjectMapper::toDto)
                 .collect(Collectors.toCollection(LinkedList::new));

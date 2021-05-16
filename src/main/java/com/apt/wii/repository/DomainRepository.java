@@ -2,6 +2,7 @@ package com.apt.wii.repository;
 
 import com.apt.wii.domain.Domain;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -9,4 +10,4 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface DomainRepository extends JpaRepository<Domain, Long> {}
+public interface DomainRepository extends PagingAndSortingRepository<Domain, Long> {}

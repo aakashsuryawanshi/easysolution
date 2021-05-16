@@ -3,6 +3,7 @@ package com.apt.wii.service.impl;
 import com.apt.wii.domain.Domain;
 import com.apt.wii.repository.DomainRepository;
 import com.apt.wii.service.DomainService;
+import com.apt.wii.service.dto.ContentDTO;
 import com.apt.wii.service.dto.DomainDTO;
 import com.apt.wii.service.mapper.DomainMapper;
 import java.util.LinkedList;
@@ -60,7 +61,16 @@ public class DomainServiceImpl implements DomainService {
     @Transactional(readOnly = true)
     public List<DomainDTO> findAll() {
         log.debug("Request to get all Domains");
-        return domainRepository.findAll().stream().map(domainMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<DomainDTO> result = new LinkedList<DomainDTO>();
+        domainRepository
+            .findAll()
+            .forEach(
+                i -> {
+                    result.add(domainMapper.toDto(i));
+                }
+            );
+        return result;
+        //return domainRepository.findAll().stream().map(domainMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
     }
 
     @Override

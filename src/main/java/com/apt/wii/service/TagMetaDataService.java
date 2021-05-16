@@ -1,5 +1,6 @@
 package com.apt.wii.service;
 
+import com.apt.wii.service.dto.SubjectDTO;
 import com.apt.wii.service.dto.TagMetaDataDTO;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,16 @@ public interface TagMetaDataService {
      * @return the entity.
      */
     Optional<TagMetaDataDTO> findOne(Long id);
+
+    /**
+     * Get the "id" question.
+     *
+     * @param id the id of the entity.
+     * @param pageSize
+     * @param pageNo
+     * @return the entity.
+     */
+    List<TagMetaDataDTO> findByQuestion(Long id, int pageNo, int pageSize);
 
     /**
      * Delete the "id" tagMetaData.

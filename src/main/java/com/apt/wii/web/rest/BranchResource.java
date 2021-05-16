@@ -155,6 +155,23 @@ public class BranchResource {
     }
 
     /**
+     * {@code GET  /branches/:id} : get the "id" branch.
+     *
+     * @param id the id of the branchDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the branchDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/domain/{id}/branches")
+    public List<BranchDTO> getBranchByDomain(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "0") Integer pageNo,
+        @RequestParam(defaultValue = "10") Integer pageSize
+    ) {
+        log.debug("REST request to get Branch : {}", id);
+        List<BranchDTO> branchDTO = branchService.findByDomain(id, pageNo, pageSize);
+        return branchDTO;
+    }
+
+    /**
      * {@code DELETE  /branches/:id} : delete the "id" branch.
      *
      * @param id the id of the branchDTO to delete.

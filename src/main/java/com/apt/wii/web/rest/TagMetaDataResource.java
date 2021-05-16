@@ -155,6 +155,23 @@ public class TagMetaDataResource {
     }
 
     /**
+     * {@code GET  /tag-meta-data/:id} : get the "id" tagMetaData.
+     *
+     * @param id the id of the tagMetaDataDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the tagMetaDataDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/question/{id}/tag-meta-data")
+    public List<TagMetaDataDTO> getTagMetaDataByQuestion(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "0") Integer pageNo,
+        @RequestParam(defaultValue = "10") Integer pageSize
+    ) {
+        log.debug("REST request to get TagMetaData : {}", id);
+        List<TagMetaDataDTO> tagMetaDataDTO = tagMetaDataService.findByQuestion(id, pageNo, pageSize);
+        return tagMetaDataDTO;
+    }
+
+    /**
      * {@code DELETE  /tag-meta-data/:id} : delete the "id" tagMetaData.
      *
      * @param id the id of the tagMetaDataDTO to delete.

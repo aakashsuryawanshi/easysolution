@@ -3,14 +3,21 @@ package com.apt.wii.service.impl;
 import com.apt.wii.domain.Content;
 import com.apt.wii.repository.ContentRepository;
 import com.apt.wii.service.ContentService;
+import com.apt.wii.service.QuestionService;
+import com.apt.wii.service.dto.BranchDTO;
 import com.apt.wii.service.dto.ContentDTO;
+import com.apt.wii.service.dto.QuestionDTO;
+import com.apt.wii.service.dto.SubjectDTO;
 import com.apt.wii.service.mapper.ContentMapper;
+import com.apt.wii.service.mapper.QuestionMapper;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +34,20 @@ public class ContentServiceImpl implements ContentService {
 
     private final ContentMapper contentMapper;
 
-    public ContentServiceImpl(ContentRepository contentRepository, ContentMapper contentMapper) {
+    private final QuestionMapper questionMapper;
+
+    private final QuestionService questionService;
+
+    public ContentServiceImpl(
+        ContentRepository contentRepository,
+        ContentMapper contentMapper,
+        QuestionService questionService,
+        QuestionMapper questionMapper
+    ) {
         this.contentRepository = contentRepository;
         this.contentMapper = contentMapper;
+        this.questionMapper = questionMapper;
+        this.questionService = questionService;
     }
 
     @Override
@@ -60,7 +78,16 @@ public class ContentServiceImpl implements ContentService {
     @Transactional(readOnly = true)
     public List<ContentDTO> findAll() {
         log.debug("Request to get all Contents");
-        return contentRepository.findAll().stream().map(contentMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<ContentDTO> result = new LinkedList<ContentDTO>();
+        contentRepository
+            .findAll()
+            .forEach(
+                i -> {
+                    result.add(contentMapper.toDto(i));
+                }
+            );
+        return result;
+        //return contentRepository.findAll().stream().map(contentMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
     }
 
     @Override
@@ -74,5 +101,21 @@ public class ContentServiceImpl implements ContentService {
     public void delete(Long id) {
         log.debug("Request to delete Content : {}", id);
         contentRepository.deleteById(id);
+    }
+
+    @Override
+    public List<ContentDTO> findByQuestion(Long id) {
+        log.debug("Request to get content by question id: {}", id);
+        Optional<QuestionDTO> b = questionService.findOne(id);
+
+        if (b.isPresent()) {
+            return contentRepository
+                .findByQuestion(questionMapper.toEntity(b.get()))
+                .stream()
+                .map(contentMapper::toDto)
+                .collect(Collectors.toCollection(LinkedList::new));
+        }
+        log.error("Invalid question ID: {}", id);
+        return null;
     }
 }

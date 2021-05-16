@@ -4,7 +4,9 @@ import com.apt.wii.domain.Branch;
 import com.apt.wii.domain.Semester;
 import com.apt.wii.service.dto.BranchDTO;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface SemesterRepository extends JpaRepository<Semester, Long> {
-    List<Semester> findByBranch(Branch b);
+public interface SemesterRepository extends PagingAndSortingRepository<Semester, Long> {
+    List<Semester> findByBranch(Branch b, Pageable paging);
+
 }

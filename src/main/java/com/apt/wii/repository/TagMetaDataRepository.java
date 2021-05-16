@@ -1,7 +1,12 @@
 package com.apt.wii.repository;
 
+import com.apt.wii.domain.Content;
+import com.apt.wii.domain.Question;
 import com.apt.wii.domain.TagMetaData;
+import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -9,4 +14,6 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface TagMetaDataRepository extends JpaRepository<TagMetaData, Long> {}
+public interface TagMetaDataRepository extends PagingAndSortingRepository<TagMetaData, Long> {
+    List<TagMetaData> findByQuestion(Question question, Pageable paging);
+}
