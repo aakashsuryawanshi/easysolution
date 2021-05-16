@@ -5,6 +5,7 @@ import com.apt.wii.repository.SemesterRepository;
 import com.apt.wii.service.BranchService;
 import com.apt.wii.service.SemesterService;
 import com.apt.wii.service.dto.BranchDTO;
+import com.apt.wii.service.dto.QuestionDTO;
 import com.apt.wii.service.dto.SemesterDTO;
 import com.apt.wii.service.mapper.BranchMapper;
 import com.apt.wii.service.mapper.SemesterMapper;
@@ -15,6 +16,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,7 +78,16 @@ public class SemesterServiceImpl implements SemesterService {
     @Transactional(readOnly = true)
     public List<SemesterDTO> findAll() {
         log.debug("Request to get all Semesters");
-        return semesterRepository.findAll().stream().map(semesterMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<SemesterDTO> result = new LinkedList<SemesterDTO>();
+        semesterRepository
+            .findAll()
+            .forEach(
+                i -> {
+                    result.add(semesterMapper.toDto(i));
+                }
+            );
+        return result;
+        //return semesterRepository.findAll().stream().map(semesterMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
     }
 
     @Override
@@ -92,12 +104,13 @@ public class SemesterServiceImpl implements SemesterService {
     }
 
     @Override
-    public List<SemesterDTO> findByBranch(Long branchId) {
+    public List<SemesterDTO> findByBranch(Long branchId, int page, int size) {
         log.debug("Request to get Semester by branch id: {}", branchId);
         Optional<BranchDTO> b = branchService.findOne(branchId);
+        Pageable paging = PageRequest.of(page, size);
         if (b.isPresent()) {
             return semesterRepository
-                .findByBranch(branchMapper.toEntity(b.get()))
+                .findByBranch(branchMapper.toEntity(b.get()), paging)
                 .stream()
                 .map(semesterMapper::toDto)
                 .collect(Collectors.toCollection(LinkedList::new));

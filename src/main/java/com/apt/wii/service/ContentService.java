@@ -1,5 +1,6 @@
 package com.apt.wii.service;
 
+import com.apt.wii.service.dto.BranchDTO;
 import com.apt.wii.service.dto.ContentDTO;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,14 @@ public interface ContentService {
      * @return the entity.
      */
     Optional<ContentDTO> findOne(Long id);
+
+    /**
+     * Get the "id" question.
+     *
+     * @param id the id of the entity.
+     * @return the entity.
+     */
+    List<ContentDTO> findByQuestion(Long id, int page, int size);
 
     /**
      * Delete the "id" content.

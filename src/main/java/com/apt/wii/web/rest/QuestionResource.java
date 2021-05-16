@@ -1,8 +1,10 @@
 package com.apt.wii.web.rest;
 
+import com.apt.wii.domain.TagMetaData;
 import com.apt.wii.repository.QuestionRepository;
 import com.apt.wii.service.QuestionService;
 import com.apt.wii.service.dto.QuestionDTO;
+import com.apt.wii.service.dto.TagMetaDataDTO;
 import com.apt.wii.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -160,10 +162,32 @@ public class QuestionResource {
      * @param id the id of the questionDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the questionDTO, or with status {@code 404 (Not Found)}.
      */
-    @GetMapping("/questions/{id}/subject")
-    public List<QuestionDTO> getQuestionBySubject(@PathVariable Long id) {
+    @GetMapping("/subject/{id}/questions")
+    public List<QuestionDTO> getQuestionBySubject(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "0") Integer pageNo,
+        @RequestParam(defaultValue = "10") Integer pageSize
+    ) {
         log.debug("REST request to get Question : {}", id);
-        List<QuestionDTO> questionDTOs = questionService.findBySubject(id);
+        List<QuestionDTO> questionDTOs = questionService.findBySubject(id, pageNo, pageSize);
+        return questionDTOs;
+    }
+
+    /**
+     * {@code GET  /questions/:id} : get the "id" question.
+     *
+     * @param id the id of the questionDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the questionDTO, or with status {@code 404 (Not Found)}.
+     */
+    @PostMapping("/tag-meta-data/questions")
+    public List<QuestionDTO> getQuestionByTagMetaData(
+        @RequestBody List<TagMetaDataDTO> tags,
+        @RequestParam(defaultValue = "0") Integer pageNo,
+        @RequestParam(defaultValue = "10") Integer pageSize,
+        @RequestParam(defaultValue = "AND") String op
+    ) {
+        log.debug("REST request to get Question by tags: {}", tags.toString());
+        List<QuestionDTO> questionDTOs = questionService.findByTag(tags, op, pageNo, pageSize);
         return questionDTOs;
     }
 

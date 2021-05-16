@@ -1,13 +1,16 @@
 package com.apt.wii.service.impl;
 
 import com.apt.wii.domain.Question;
+import com.apt.wii.domain.TagMetaData;
 import com.apt.wii.repository.QuestionRepository;
 import com.apt.wii.service.QuestionService;
 import com.apt.wii.service.SemesterService;
 import com.apt.wii.service.SubjectService;
 import com.apt.wii.service.dto.BranchDTO;
+import com.apt.wii.service.dto.DomainDTO;
 import com.apt.wii.service.dto.QuestionDTO;
 import com.apt.wii.service.dto.SubjectDTO;
+import com.apt.wii.service.dto.TagMetaDataDTO;
 import com.apt.wii.service.mapper.QuestionMapper;
 import com.apt.wii.service.mapper.SubjectMapper;
 import java.util.LinkedList;
@@ -16,6 +19,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +81,16 @@ public class QuestionServiceImpl implements QuestionService {
     @Transactional(readOnly = true)
     public List<QuestionDTO> findAll() {
         log.debug("Request to get all Questions");
-        return questionRepository.findAll().stream().map(questionMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<QuestionDTO> result = new LinkedList<QuestionDTO>();
+        questionRepository
+            .findAll()
+            .forEach(
+                i -> {
+                    result.add(questionMapper.toDto(i));
+                }
+            );
+        return result;
+        //return questionRepository.findAll().stream().map(questionMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
     }
 
     @Override
@@ -93,17 +107,25 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public List<QuestionDTO> findBySubject(Long subjectId) {
-        log.debug("Request to get Semester by branch id: {}", subjectId);
+    public List<QuestionDTO> findBySubject(Long subjectId, int page, int size) {
+        log.debug("Request to get questions by subject id: {}", subjectId);
         Optional<SubjectDTO> b = subjectService.findOne(subjectId);
+        Pageable paging = PageRequest.of(page, size);
         if (b.isPresent()) {
             return questionRepository
-                .findBySubject(subjectMapper.toEntity(b.get()))
+                .findBySubject(subjectMapper.toEntity(b.get()), paging)
                 .stream()
                 .map(questionMapper::toDto)
                 .collect(Collectors.toCollection(LinkedList::new));
         }
         log.error("Invalid branch ID: {}", subjectId);
+        return null;
+    }
+
+    @Override
+    public List<QuestionDTO> findByTag(List<TagMetaDataDTO> tags, String ops, int page, int size) {
+        log.debug("Request to get questions by tags: {}", tags);
+
         return null;
     }
 }
