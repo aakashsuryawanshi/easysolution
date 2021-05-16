@@ -47,6 +47,7 @@ public interface SemesterService {
      */
     List<SemesterDTO> findByBranch(Long branchId, int page, int size);
 
+
     /**
      * Delete the "id" semester.
      *

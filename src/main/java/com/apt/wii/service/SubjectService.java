@@ -48,6 +48,7 @@ public interface SubjectService {
      */
     List<SubjectDTO> findBySemester(Long semesterId, int page, int size);
 
+
     /**
      * Delete the "id" subject.
      *

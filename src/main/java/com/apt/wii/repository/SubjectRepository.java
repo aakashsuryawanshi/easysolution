@@ -7,6 +7,7 @@ import com.apt.wii.service.dto.SubjectDTO;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
@@ -18,4 +19,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SubjectRepository extends PagingAndSortingRepository<Subject, Long> {
     List<Subject> findBySemester(Semester semesterDTO, Pageable paging);
+
 }
