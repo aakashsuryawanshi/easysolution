@@ -23,7 +23,7 @@ public class Content implements Serializable {
     @Column(name = "type")
     private ContentType type;
 
-    @Column(name = "text")
+    @Column(name = "text", length=3000)
     private String text;
 
     @Column(name = "file_path")
