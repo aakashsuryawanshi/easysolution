@@ -46,8 +46,7 @@ public interface SubjectService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    List<SubjectDTO> findBySemester(Long semesterId, int page, int size);
-
+    List<SubjectDTO> findBySemester(Long semesterId);
 
     /**
      * Delete the "id" subject.

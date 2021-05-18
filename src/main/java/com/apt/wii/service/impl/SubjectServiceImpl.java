@@ -104,13 +104,12 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public List<SubjectDTO> findBySemester(Long semesterId, int page, int size) {
+    public List<SubjectDTO> findBySemester(Long semesterId) {
         log.debug("Request to get Semester by branch id: {}", semesterId);
         Optional<SemesterDTO> b = semesterService.findOne(semesterId);
-        Pageable paging = PageRequest.of(page, size);
         if (b.isPresent()) {
             return subjectRepository
-                .findBySemester(semesterMapper.toEntity(b.get()), paging)
+                .findBySemester(semesterMapper.toEntity(b.get()))
                 .stream()
                 .map(subjectMapper::toDto)
                 .collect(Collectors.toCollection(LinkedList::new));

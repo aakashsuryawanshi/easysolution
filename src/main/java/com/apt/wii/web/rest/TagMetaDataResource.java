@@ -161,13 +161,9 @@ public class TagMetaDataResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the tagMetaDataDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/question/{id}/tag-meta-data")
-    public List<TagMetaDataDTO> getTagMetaDataByQuestion(
-        @PathVariable Long id,
-        @RequestParam(defaultValue = "0") Integer pageNo,
-        @RequestParam(defaultValue = "10") Integer pageSize
-    ) {
+    public List<TagMetaDataDTO> getTagMetaDataByQuestion(@PathVariable Long id) {
         log.debug("REST request to get TagMetaData : {}", id);
-        List<TagMetaDataDTO> tagMetaDataDTO = tagMetaDataService.findByQuestion(id, pageNo, pageSize);
+        List<TagMetaDataDTO> tagMetaDataDTO = tagMetaDataService.findByQuestion(id);
         return tagMetaDataDTO;
     }
 

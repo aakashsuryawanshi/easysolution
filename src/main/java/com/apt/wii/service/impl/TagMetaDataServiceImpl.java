@@ -103,13 +103,12 @@ public class TagMetaDataServiceImpl implements TagMetaDataService {
     }
 
     @Override
-    public List<TagMetaDataDTO> findByQuestion(Long id, int page, int size) {
+    public List<TagMetaDataDTO> findByQuestion(Long id) {
         log.debug("Request to get tag meta data by question id: {}", id);
         Optional<QuestionDTO> b = questionService.findOne(id);
-        Pageable paging = PageRequest.of(page, size);
         if (b.isPresent()) {
             return tagMetaDataRepository
-                .findByQuestion(questionMapper.toEntity(b.get()), paging)
+                .findByQuestion(questionMapper.toEntity(b.get()))
                 .stream()
                 .map(tagMetaDataMapper::toDto)
                 .collect(Collectors.toCollection(LinkedList::new));

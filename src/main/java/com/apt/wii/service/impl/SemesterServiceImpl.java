@@ -5,9 +5,7 @@ import com.apt.wii.repository.SemesterRepository;
 import com.apt.wii.service.BranchService;
 import com.apt.wii.service.SemesterService;
 import com.apt.wii.service.dto.BranchDTO;
-
 import com.apt.wii.service.dto.QuestionDTO;
-
 import com.apt.wii.service.dto.SemesterDTO;
 import com.apt.wii.service.mapper.BranchMapper;
 import com.apt.wii.service.mapper.SemesterMapper;
@@ -106,13 +104,12 @@ public class SemesterServiceImpl implements SemesterService {
     }
 
     @Override
-    public List<SemesterDTO> findByBranch(Long branchId, int page, int size) {
+    public List<SemesterDTO> findByBranch(Long branchId) {
         log.debug("Request to get Semester by branch id: {}", branchId);
         Optional<BranchDTO> b = branchService.findOne(branchId);
-        Pageable paging = PageRequest.of(page, size);
         if (b.isPresent()) {
             return semesterRepository
-                .findByBranch(branchMapper.toEntity(b.get()), paging)
+                .findByBranch(branchMapper.toEntity(b.get()))
                 .stream()
                 .map(semesterMapper::toDto)
                 .collect(Collectors.toCollection(LinkedList::new));

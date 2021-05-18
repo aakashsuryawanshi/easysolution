@@ -161,13 +161,9 @@ public class SubjectResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the subjectDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/semester/{id}/subjects")
-    public List<SubjectDTO> getSubjectBySemester(
-        @PathVariable Long id,
-        @RequestParam(defaultValue = "0") Integer pageNo,
-        @RequestParam(defaultValue = "10") Integer pageSize
-    ) {
+    public List<SubjectDTO> getSubjectBySemester(@PathVariable Long id) {
         log.debug("REST request to get Subject : {}", id);
-        List<SubjectDTO> subjectDTO = subjectService.findBySemester(id, pageNo, pageSize);
+        List<SubjectDTO> subjectDTO = subjectService.findBySemester(id);
         return subjectDTO;
     }
 

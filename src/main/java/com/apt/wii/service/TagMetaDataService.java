@@ -48,7 +48,7 @@ public interface TagMetaDataService {
      * @param pageNo
      * @return the entity.
      */
-    List<TagMetaDataDTO> findByQuestion(Long id, int pageNo, int pageSize);
+    List<TagMetaDataDTO> findByQuestion(Long id);
 
     /**
      * Delete the "id" tagMetaData.

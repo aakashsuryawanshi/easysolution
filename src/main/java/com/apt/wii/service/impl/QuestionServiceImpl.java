@@ -7,12 +7,10 @@ import com.apt.wii.service.QuestionService;
 import com.apt.wii.service.SemesterService;
 import com.apt.wii.service.SubjectService;
 import com.apt.wii.service.dto.BranchDTO;
-
 import com.apt.wii.service.dto.DomainDTO;
 import com.apt.wii.service.dto.QuestionDTO;
 import com.apt.wii.service.dto.SubjectDTO;
 import com.apt.wii.service.dto.TagMetaDataDTO;
-
 import com.apt.wii.service.mapper.QuestionMapper;
 import com.apt.wii.service.mapper.SubjectMapper;
 import java.util.LinkedList;
@@ -21,6 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -109,16 +108,12 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public List<QuestionDTO> findBySubject(Long subjectId, int page, int size) {
+    public Page<Question> findBySubject(Long subjectId, int page, int size) {
         log.debug("Request to get questions by subject id: {}", subjectId);
         Optional<SubjectDTO> b = subjectService.findOne(subjectId);
         Pageable paging = PageRequest.of(page, size);
         if (b.isPresent()) {
-            return questionRepository
-                .findBySubject(subjectMapper.toEntity(b.get()), paging)
-                .stream()
-                .map(questionMapper::toDto)
-                .collect(Collectors.toCollection(LinkedList::new));
+            return questionRepository.findBySubject(subjectMapper.toEntity(b.get()), paging);
         }
         log.error("Invalid branch ID: {}", subjectId);
         return null;
@@ -130,5 +125,4 @@ public class QuestionServiceImpl implements QuestionService {
 
         return null;
     }
-
 }

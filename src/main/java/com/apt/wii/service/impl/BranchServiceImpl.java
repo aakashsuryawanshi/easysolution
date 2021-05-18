@@ -103,13 +103,12 @@ public class BranchServiceImpl implements BranchService {
     }
 
     @Override
-    public List<BranchDTO> findByDomain(Long id, int page, int size) {
+    public List<BranchDTO> findByDomain(Long id) {
         log.debug("Request to get Branch by domain id: {}", id);
         Optional<DomainDTO> b = domainService.findOne(id);
-        Pageable paging = PageRequest.of(page, size);
         if (b.isPresent()) {
             return branchRepository
-                .findByDomain(domainMapper.toEntity(b.get()), paging)
+                .findByDomain(domainMapper.toEntity(b.get()))
                 .stream()
                 .map(branchMapper::toDto)
                 .collect(Collectors.toCollection(LinkedList::new));

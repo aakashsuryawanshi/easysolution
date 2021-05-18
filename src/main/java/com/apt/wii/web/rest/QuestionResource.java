@@ -1,10 +1,12 @@
 package com.apt.wii.web.rest;
 
+import com.apt.wii.domain.Question;
 import com.apt.wii.domain.TagMetaData;
 import com.apt.wii.repository.QuestionRepository;
 import com.apt.wii.service.QuestionService;
 import com.apt.wii.service.dto.QuestionDTO;
 import com.apt.wii.service.dto.TagMetaDataDTO;
+import com.apt.wii.util.CommonUtil;
 import com.apt.wii.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,6 +16,8 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
@@ -163,14 +167,14 @@ public class QuestionResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the questionDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/subject/{id}/questions")
-    public List<QuestionDTO> getQuestionBySubject(
+    public ResponseEntity<List<Question>> getQuestionBySubject(
         @PathVariable Long id,
         @RequestParam(defaultValue = "0") Integer pageNo,
         @RequestParam(defaultValue = "10") Integer pageSize
     ) {
         log.debug("REST request to get Question : {}", id);
-        List<QuestionDTO> questionDTOs = questionService.findBySubject(id, pageNo, pageSize);
-        return questionDTOs;
+        Page<Question> questionDTOs = questionService.findBySubject(id, pageNo, pageSize);
+        return CommonUtil.getPaginatedResponseEntity(questionDTOs);
     }
 
     /**

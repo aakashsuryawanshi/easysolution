@@ -15,6 +15,5 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface SemesterRepository extends PagingAndSortingRepository<Semester, Long> {
-    List<Semester> findByBranch(Branch b, Pageable paging);
-
+    List<Semester> findByBranch(Branch b);
 }

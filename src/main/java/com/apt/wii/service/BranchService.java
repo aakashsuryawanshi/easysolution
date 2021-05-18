@@ -46,7 +46,7 @@ public interface BranchService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    List<BranchDTO> findByDomain(Long id, int page, int size);
+    List<BranchDTO> findByDomain(Long id);
 
     /**
      * Delete the "id" branch.

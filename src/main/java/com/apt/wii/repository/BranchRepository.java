@@ -16,5 +16,5 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface BranchRepository extends PagingAndSortingRepository<Branch, Long> {
-    List<Branch> findByDomain(Domain domain, Pageable paging);
+    List<Branch> findByDomain(Domain domain);
 }

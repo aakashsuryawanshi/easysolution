@@ -15,5 +15,5 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface TagMetaDataRepository extends PagingAndSortingRepository<TagMetaData, Long> {
-    List<TagMetaData> findByQuestion(Question question, Pageable paging);
+    List<TagMetaData> findByQuestion(Question question);
 }

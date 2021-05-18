@@ -161,13 +161,9 @@ public class BranchResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the branchDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/domain/{id}/branches")
-    public List<BranchDTO> getBranchByDomain(
-        @PathVariable Long id,
-        @RequestParam(defaultValue = "0") Integer pageNo,
-        @RequestParam(defaultValue = "10") Integer pageSize
-    ) {
+    public List<BranchDTO> getBranchByDomain(@PathVariable Long id) {
         log.debug("REST request to get Branch : {}", id);
-        List<BranchDTO> branchDTO = branchService.findByDomain(id, pageNo, pageSize);
+        List<BranchDTO> branchDTO = branchService.findByDomain(id);
         return branchDTO;
     }
 

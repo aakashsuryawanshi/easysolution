@@ -161,13 +161,9 @@ public class SemesterResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the semesterDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/branch/{id}/semesters")
-    public List<SemesterDTO> getSemesterByBranch(
-        @PathVariable Long id,
-        @RequestParam(defaultValue = "0") Integer pageNo,
-        @RequestParam(defaultValue = "10") Integer pageSize
-    ) {
+    public List<SemesterDTO> getSemesterByBranch(@PathVariable Long id) {
         log.debug("REST request to get Semester : {}", id);
-        List<SemesterDTO> semesterDTOs = semesterService.findByBranch(id, pageNo, pageSize);
+        List<SemesterDTO> semesterDTOs = semesterService.findByBranch(id);
         return semesterDTOs;
     }
 
