@@ -46,6 +46,8 @@ public class WebConfigurer implements ServletContextInitializer {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = jHipsterProperties.getCors();
+        config.addExposedHeader("X-Total-Elements");
+        config.addExposedHeader("X-Total-Pages");
         if (!CollectionUtils.isEmpty(config.getAllowedOrigins())) {
             log.debug("Registering CORS filter");
             source.registerCorsConfiguration("/api/**", config);

@@ -1,6 +1,7 @@
 package com.apt.wii.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,7 +30,8 @@ public class Question implements Serializable {
     @Column(name = "topic")
     private String topic;
 
-    @OneToMany(mappedBy = "question")
+    @JsonManagedReference
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "question")
     @JsonIgnoreProperties(value = { "question" }, allowSetters = true)
     private Set<TagMetaData> tags = new HashSet<>();
 

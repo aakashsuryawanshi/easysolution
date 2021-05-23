@@ -27,7 +27,7 @@ public class Subject implements Serializable {
     private String description;
 
     @OneToMany(mappedBy = "subject")
-    @JsonIgnoreProperties(value = { "tags", "answers", "subject" }, allowSetters = true)
+    @JsonIgnoreProperties(value = { "answers", "subject" }, allowSetters = true)
     private Set<Question> questions = new HashSet<>();
 
     @ManyToOne

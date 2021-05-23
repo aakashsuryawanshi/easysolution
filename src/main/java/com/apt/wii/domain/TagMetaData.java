@@ -1,5 +1,6 @@
 package com.apt.wii.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import javax.persistence.*;
@@ -24,8 +25,9 @@ public class TagMetaData implements Serializable {
     @Column(name = "value")
     private String value;
 
-    @ManyToOne
-    @JsonIgnoreProperties(value = { "tags", "answers", "subject" }, allowSetters = true)
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties(value = { "question" }, allowSetters = true)
     private Question question;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
