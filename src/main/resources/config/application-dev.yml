@@ -99,3 +99,5 @@ jhipster:
 # ===================================================================
 
 # application:
+wii:
+  folder_path: D:\\work\\prjs\\WII\\wii_app_files\\
