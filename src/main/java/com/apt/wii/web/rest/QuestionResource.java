@@ -11,8 +11,10 @@ import com.apt.wii.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import net.logstash.logback.encoder.org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -169,11 +171,12 @@ public class QuestionResource {
     @GetMapping("/subject/{id}/questions")
     public ResponseEntity<List<Question>> getQuestionBySubject(
         @PathVariable Long id,
+        @RequestParam(defaultValue = StringUtils.EMPTY) String title,
         @RequestParam(defaultValue = "0") Integer pageNo,
         @RequestParam(defaultValue = "10") Integer pageSize
     ) {
         log.debug("REST request to get Question : {}", id);
-        Page<Question> questionDTOs = questionService.findBySubject(id, pageNo, pageSize);
+        Page<Question> questionDTOs = questionService.findBySubject(id, pageNo, pageSize, title);
         return CommonUtil.getPaginatedResponseEntity(questionDTOs);
     }
 
@@ -183,16 +186,17 @@ public class QuestionResource {
      * @param id the id of the questionDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the questionDTO, or with status {@code 404 (Not Found)}.
      */
-    @PostMapping("/tag-meta-data/questions")
-    public List<QuestionDTO> getQuestionByTagMetaData(
-        @RequestBody List<TagMetaDataDTO> tags,
+    @PostMapping("/subject/{id}/questions")
+    public ResponseEntity<List<Question>> getQuestionBySubject(
+        @RequestBody Map<String, Object> tags,
+        @PathVariable Long id,
+        @RequestParam(defaultValue = StringUtils.EMPTY) String title,
         @RequestParam(defaultValue = "0") Integer pageNo,
-        @RequestParam(defaultValue = "10") Integer pageSize,
-        @RequestParam(defaultValue = "AND") String op
+        @RequestParam(defaultValue = "10") Integer pageSize
     ) {
         log.debug("REST request to get Question by tags: {}", tags.toString());
-        List<QuestionDTO> questionDTOs = questionService.findByTag(tags, op, pageNo, pageSize);
-        return questionDTOs;
+        Page<Question> questionDTOs = questionService.getQuestionBySubject(id, tags, title, pageNo, pageSize);
+        return CommonUtil.getPaginatedResponseEntity(questionDTOs);
     }
 
     /**
