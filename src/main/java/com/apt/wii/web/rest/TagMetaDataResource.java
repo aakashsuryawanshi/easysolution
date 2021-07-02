@@ -7,6 +7,7 @@ import com.apt.wii.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -165,6 +166,12 @@ public class TagMetaDataResource {
         log.debug("REST request to get TagMetaData : {}", id);
         List<TagMetaDataDTO> tagMetaDataDTO = tagMetaDataService.findByQuestion(id);
         return tagMetaDataDTO;
+    }
+
+    @GetMapping("/tag-meta-data/allUnique")
+    public Map<String, List<String>> getTagsForFilters() {
+        log.debug("REST request to get TagMetaData for Filter");
+        return tagMetaDataService.findAllUniqueTags();
     }
 
     /**

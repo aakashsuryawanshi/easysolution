@@ -9,8 +9,12 @@ import com.apt.wii.service.dto.SubjectDTO;
 import com.apt.wii.service.dto.TagMetaDataDTO;
 import com.apt.wii.service.mapper.QuestionMapper;
 import com.apt.wii.service.mapper.TagMetaDataMapper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -19,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Service Implementation for managing {@link TagMetaData}.
@@ -115,5 +120,20 @@ public class TagMetaDataServiceImpl implements TagMetaDataService {
         }
         log.error("Invalid question ID: {}", id);
         return null;
+    }
+
+    @Override
+    public Map<String, List<String>> findAllUniqueTags() {
+        Iterable<TagMetaData> tagMetadataIterable = tagMetaDataRepository.findAll();
+        Iterator<TagMetaData> tagsIterator = tagMetadataIterable.iterator();
+        Map<String, List<String>> tags = new HashMap<>();
+        while (tagsIterator.hasNext()) {
+            TagMetaData tagMetaData = tagsIterator.next();
+            List<String> values = tags.get(tagMetaData.getKey());
+            if (CollectionUtils.isEmpty(values)) values = new ArrayList<String>();
+            if (!values.contains(tagMetaData.getValue())) values.add(tagMetaData.getValue());
+            tags.put(tagMetaData.getKey(), values);
+        }
+        return tags;
     }
 }

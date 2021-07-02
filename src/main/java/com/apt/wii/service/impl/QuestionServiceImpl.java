@@ -13,10 +13,13 @@ import com.apt.wii.service.dto.SubjectDTO;
 import com.apt.wii.service.dto.TagMetaDataDTO;
 import com.apt.wii.service.mapper.QuestionMapper;
 import com.apt.wii.service.mapper.SubjectMapper;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import net.logstash.logback.encoder.org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -24,6 +27,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.thymeleaf.util.MapUtils;
 
 /**
  * Service Implementation for managing {@link Question}.
@@ -91,7 +96,8 @@ public class QuestionServiceImpl implements QuestionService {
                 }
             );
         return result;
-        //return questionRepository.findAll().stream().map(questionMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
+        // return
+        // questionRepository.findAll().stream().map(questionMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
     }
 
     @Override
@@ -108,21 +114,29 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public Page<Question> findBySubject(Long subjectId, int page, int size) {
+    public Page<Question> findBySubject(Long subjectId, int page, int size, String title) {
         log.debug("Request to get questions by subject id: {}", subjectId);
         Optional<SubjectDTO> b = subjectService.findOne(subjectId);
         Pageable paging = PageRequest.of(page, size);
         if (b.isPresent()) {
-            return questionRepository.findBySubject(subjectMapper.toEntity(b.get()), paging);
+            return StringUtils.isBlank(title)
+                ? questionRepository.findBySubject(subjectMapper.toEntity(b.get()), paging)
+                : questionRepository.findBySubjectAndTitleContainingIgnoreCase(subjectMapper.toEntity(b.get()), title, paging);
         }
         log.error("Invalid branch ID: {}", subjectId);
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<QuestionDTO> findByTag(List<TagMetaDataDTO> tags, String ops, int page, int size) {
+    public Page<Question> getQuestionBySubject(Long subjectId, Map<String, Object> tags, String title, int page, int size) {
         log.debug("Request to get questions by tags: {}", tags);
-
-        return null;
+        Pageable paging = PageRequest.of(page, size);
+        if (MapUtils.isEmpty(tags)) {
+            return findBySubject(subjectId, page, size, title);
+        }
+        List<String> filterTags = new ArrayList<>();
+        tags.values().stream().forEach(values -> filterTags.addAll((List<String>) values));
+        return questionRepository.getQuestionsBySubjectAndTags(subjectId, tags.keySet(), filterTags, paging);
     }
 }

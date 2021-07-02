@@ -6,6 +6,7 @@ import com.apt.wii.service.dto.QuestionDTO;
 import com.apt.wii.service.dto.SubjectDTO;
 import com.apt.wii.service.dto.TagMetaDataDTO;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 
@@ -46,12 +47,13 @@ public interface QuestionService {
 
     /**
      * Get the "id" subject.
-     *
+     * @param title TODO
      * @param id the id of the entity.
+     *
      * @return the entity.
      */
 
-    Page<Question> findBySubject(Long subjectId, int page, int size);
+    Page<Question> findBySubject(Long subjectId, int page, int size, String title);
 
     /**
      * Get the "id" subject.
@@ -59,7 +61,7 @@ public interface QuestionService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    List<QuestionDTO> findByTag(List<TagMetaDataDTO> tags, String ops, int page, int size);
+    Page<Question> getQuestionBySubject(Long subjectId, Map<String, Object> tags, String title, int page, int size);
 
     /**
      * Delete the "id" question.

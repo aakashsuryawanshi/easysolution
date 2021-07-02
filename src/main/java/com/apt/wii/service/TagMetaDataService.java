@@ -1,8 +1,8 @@
 package com.apt.wii.service;
 
-import com.apt.wii.service.dto.SubjectDTO;
 import com.apt.wii.service.dto.TagMetaDataDTO;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -56,4 +56,6 @@ public interface TagMetaDataService {
      * @param id the id of the entity.
      */
     void delete(Long id);
+
+    Map<String, List<String>> findAllUniqueTags();
 }
